@@ -1,8 +1,14 @@
 import './less/index.less'
 import { addEvent } from './util/event'
 import datas from './data/data.json'
-import Poper from './compoents/poper'
-
+import Poper from './compoents/Poper'
+const testData = []
+for(let i=0;i<1000;i++){
+    testData.push({
+        label: i,
+        value: i
+    })
+}
 /**
  *  @focus="handleFocus"
     @blur="softFocus = false"
@@ -35,7 +41,8 @@ window.addEventListener('load',()=>{
         }
         input.focus()
     },{stop:true})
-
+    poper = new Poper(input,testData)
+    isCreatedPoper = true
     // 获取焦点
     addEvent(input,'focus',()=>{
         if ( !isCreatedPoper ){
@@ -47,7 +54,6 @@ window.addEventListener('load',()=>{
     })
     // 失去焦点
     addEvent(input,'blur',()=>{
-        console.log('blur')
         if ( isCreatedPoper ){
             poper.hide()
         }

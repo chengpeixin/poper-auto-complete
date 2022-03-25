@@ -13,5 +13,9 @@
   "devDependencies": {
     "@parcel/transformer-less": "^2.4.0",
     "parcel": "^2.4.0"
+  },
+  "dependencies": {
+    "@stitches/core": "^1.2.7",
+    "snabbdom": "^3.4.0"
   }
 }
