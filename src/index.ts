@@ -3,7 +3,7 @@ import { addEvent } from './util/event'
 import datas from './data/data.json'
 import Poper from './compoents/Poper'
 const testData = []
-for(let i=0;i<1000;i++){
+for(let i=0;i<100000;i++){
     testData.push({
         label: i,
         value: i
