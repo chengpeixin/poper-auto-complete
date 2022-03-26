@@ -3,6 +3,7 @@ import { h,init,
     propsModule,
     styleModule,
     eventListenersModule,
+    attributesModule,
     VNode
 } from 'snabbdom'
 import { css } from '@stitches/core';
@@ -13,6 +14,7 @@ const patch  = init([
     classModule,
     propsModule,
     styleModule,
+    attributesModule,
     eventListenersModule
 ])
 export default class VirtualList {
