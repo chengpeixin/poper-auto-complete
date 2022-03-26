@@ -17,9 +17,7 @@ export default class Poper {
         eventBus.on('click-label-item',(e)=>{
             console.log(e)
         })
-        setTimeout(()=>{
-            new VirtualList(datas,this.containerDom)
-        },300)
+        new VirtualList(datas,this.containerDom)
     }
     private _getTarget(){
         this.targetRect = this.target.getBoundingClientRect()
