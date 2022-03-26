@@ -7,14 +7,15 @@ import { h,init,
 } from 'snabbdom'
 import { css } from '@stitches/core';
 import { CssComponent } from '@stitches/core/types/styled-component';
-import BaseClass from '../util/BaseClass';
+import eventBus from '../util/EventBus';
+
 const patch  = init([
     classModule,
     propsModule,
     styleModule,
     eventListenersModule
 ])
-export default class VirtualList extends BaseClass{
+export default class VirtualList {
     screenHeight:number
     start=0
     itemSize=20
@@ -35,7 +36,6 @@ export default class VirtualList extends BaseClass{
     infiniteListCss: CssComponent
     infiniteListItemCss: CssComponent
     constructor(datas,target){
-        super()
         this.datas = datas
         this.target = target
         this.initDom()
@@ -96,7 +96,7 @@ export default class VirtualList extends BaseClass{
                     [infiniteListItemClassName]: true
                 },
                 on:{
-                    'click':e=>this.eventBus.emit('click-label-item',e)
+                    'click':e=>eventBus.emit('click-label-item',e)
                 }
             },item.label)
         })

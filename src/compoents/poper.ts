@@ -1,8 +1,8 @@
 import { css } from '@stitches/core';
 import { CssComponent } from '@stitches/core/types/styled-component';
-import BaseClass from '../util/BaseClass';
 import VirtualList from './VirtualList';
-export default class Poper extends BaseClass {
+import eventBus from '../util/EventBus'
+export default class Poper {
     poperDom:HTMLDivElement
     target:HTMLDivElement
     containerDom:HTMLDivElement
@@ -10,19 +10,16 @@ export default class Poper extends BaseClass {
     softState = false
     poperStyle:CssComponent
     constructor(target:HTMLDivElement,datas,opts={}){
-        super()
         this.target = target
         this._getTarget()
         this._initDom()
         this._mount()
-        this.eventBus.on('click-label-item',(e)=>{
+        eventBus.on('click-label-item',(e)=>{
             console.log(e)
         })
         setTimeout(()=>{
             new VirtualList(datas,this.containerDom)
         },300)
-
-        console.log(this.eventBus)
     }
     private _getTarget(){
         this.targetRect = this.target.getBoundingClientRect()

@@ -1,5 +1,4 @@
-//声明类
-export default class EventBus {
+class EventBus {
   private eventList: {
     [eventName: string]: Function[];
   };
@@ -18,9 +17,10 @@ export default class EventBus {
     }
   }
   public emit(eventName:string, ...args) {
-      console.log(this.eventList)
       this.eventList[eventName] && this.eventList[eventName].forEach((fn) => {
         fn(...args);
       });
   }
 }
+
+export default new EventBus()

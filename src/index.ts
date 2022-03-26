@@ -58,6 +58,26 @@ window.addEventListener('load',()=>{
             poper.hide()
         }
     })
+    
+    let cpLock = true
+    addEvent(input,'compositionstart',(e)=>{
+        console.log('compositionstart')
+        cpLock = false;
+    })
 
-    console.log(input)
+    addEvent(input,'compositionend',(e)=>{
+        console.log('compositionend')
+        cpLock = true;
+    })
+
+    addEvent(input,'input',(e)=>{
+        if ( cpLock ){
+            console.log(e.target.value)
+        }
+    })
 })
+
+// class autoComplete {
+//     constructor(){}
+
+// }
