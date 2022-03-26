@@ -1,7 +1,7 @@
 import './less/index.less'
-import { addEvent } from './util/event'
-import datas from './data/data.json'
 import Poper from './compoents/Poper'
+import { attributesModule, classModule, eventListenersModule, h, init, propsModule, styleModule, VNode } from 'snabbdom'
+import { isChrome } from './util/is'
 const testData = []
 for(let i=0;i<100000;i++){
     testData.push({
@@ -26,58 +26,98 @@ for(let i=0;i<100000;i++){
  * 
  */
 
-window.addEventListener('load',()=>{
-    const autoComplete = document.querySelector('.auto-complete')
-    const input:HTMLInputElement = document.querySelector('.auto-complete-input')
-    // 初始默认不展示menu
-    let menuVisibleOnFocus = false
-    // 是否初始化过poper
-    let isCreatedPoper = false
-    let poper = null
-    // 使其获取焦点
-    addEvent(autoComplete,'click',()=>{
-        if ( menuVisibleOnFocus ){
-            menuVisibleOnFocus = false
-        }
-        input.focus()
-    },{stop:true})
-    poper = new Poper(input,testData)
-    isCreatedPoper = true
-    // 获取焦点
-    addEvent(input,'focus',()=>{
-        if ( !isCreatedPoper ){
-            poper = new Poper(input)
-            isCreatedPoper = true
-        } else {
-            poper.show()
-        }
-    })
-    // 失去焦点
-    addEvent(input,'blur',()=>{
-        if ( isCreatedPoper ){
-            poper.hide()
-        }
-    })
-    
-    let cpLock = true
-    addEvent(input,'compositionstart',(e)=>{
-        console.log('compositionstart')
-        cpLock = false;
-    })
+const patch  = init([
+    classModule,
+    propsModule,
+    styleModule,
+    eventListenersModule,
+    attributesModule
+])
+export default class AutoComplete {
+    target:HTMLDivElement
+    targetSeat = document.createElement('div')
+    // 
+    menuVisibleOnFocus=false
+    // 
+    poper:Poper
+    autoCompleteContainer:VNode
+    autoCompleteTags:VNode
+    autoCompleteInputFull:VNode
+    autoCompleteInput:VNode
+    // 处理中文输入时间接输入导致频繁触发input事件的flag
+    onIndirectInput = false
 
-    addEvent(input,'compositionend',(e)=>{
-        console.log('compositionend')
-        cpLock = true;
-    })
+    constructor(target:HTMLDivElement){
+        this.target = target
+        this.initVnode();
+        this.initPoper()
+    }
+    private initVnode(){
+        this.autoCompleteInput = h('input',{
+            on:{
+                'blur':()=>{
+                    this.poper.hide()
+                },
+                'focus':()=>{
+                    this.poper.show()
+                },
+                'input':(e)=>{
+                    if  (this.onIndirectInput){
+                        return
+                    }
 
-    addEvent(input,'input',(e)=>{
-        if ( cpLock ){
-            console.log(e.target.value)
-        }
-    })
-})
+                    console.log(e.target.value)
+                },
+                'compositionstart':(e)=>{
+                    this.onIndirectInput = true
+                },
+                'compositionend':(e)=>{
+                    this.onIndirectInput = false
+                    // chrome触发事件规则与其他浏览器不一致，所以需要单独判断
+                    if ( isChrome() ){
+                        e.target.dispatchEvent(new CustomEvent('input'))
+                    }
+                }
+            },
+            attrs:{
+                type:'text'
+            }
+        })
+        this.autoCompleteInputFull = h('div',{
+            class:{
+                'auto-complete-input-full':true
+            }
+        },[this.autoCompleteInput])
+        this.autoCompleteTags = h('div',{
+            class:{
+                'auto-complete-tags':true
+            }
+        })
+        this.autoCompleteContainer = h('div',{
+            class:{
+                'auto-complete':true
+            },
+            on:{
+                'click':(e)=>{
+                    e.stopPropagation()
+                    if ( this.menuVisibleOnFocus ){
+                        this.menuVisibleOnFocus = false
+                    }
+                    (this.autoCompleteInput.elm as HTMLInputElement).focus()
+                }
+            }
+        },[
+            this.autoCompleteTags,
+            this.autoCompleteInputFull
+        ])
+        patch(this.targetSeat,this.autoCompleteContainer)
+        this.target.innerHTML = ''
+        this.target.appendChild(this.targetSeat)
+    }
+    private initPoper(){
+        this.poper = new Poper(this.autoCompleteInput.elm as HTMLDivElement,testData)
 
-// class autoComplete {
-//     constructor(){}
+    }
+}
 
-// }
+window['AutoComplete'] = AutoComplete

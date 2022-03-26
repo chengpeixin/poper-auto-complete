@@ -7,15 +7,13 @@
     <title>Document</title>
 </head>
 <body>
-    <div style="margin:300px 500px;">
-        <div class="auto-complete">
-            <div class="auto-complete-tags"></div>
-            <div class="auto-complete-input-full">
-                <input class="auto-complete-input" type="text">
-            </div>
-        </div>
-    </div>
-
+    <div style="margin:300px 500px;" id="xxx"></div>
 </body>
 </html>
 <script type="module" src="src/index.ts"></script>
+
+<script>
+    window.onload = function(){
+        new AutoComplete(document.querySelector('#xxx'))
+    }
+</script>
