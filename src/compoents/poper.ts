@@ -2,13 +2,25 @@ import { css } from '@stitches/core';
 import { CssComponent } from '@stitches/core/types/styled-component';
 import VirtualList from './VirtualList';
 import eventBus from '../util/EventBus'
+import { cloneDeep } from 'lodash'
+import { attributesModule, classModule, eventListenersModule, h, init, propsModule, styleModule, VNode } from 'snabbdom'
+const patch  = init([
+    classModule,
+    propsModule,
+    styleModule,
+    eventListenersModule,
+    attributesModule
+])
 export default class Poper {
     poperDom:HTMLDivElement
     target:HTMLDivElement
     containerDom:HTMLDivElement
-    targetRect:{}
+    targetRect:DOMRect
     softState = false
     poperStyle:CssComponent
+    virtualList: VirtualList
+    containerVnode:VNode
+    poperVnode:VNode
     constructor(target:HTMLDivElement,datas,opts={}){
         this.target = target
         this._getTarget()
@@ -17,14 +29,13 @@ export default class Poper {
         eventBus.on('click-label-item',(e)=>{
             console.log(e)
         })
-        new VirtualList(datas,this.containerDom)
+        this.virtualList = new VirtualList(datas,this.containerVnode)
     }
     private _getTarget(){
         this.targetRect = this.target.getBoundingClientRect()
     }
     private _initDom (){
         const {top,height,left,width} = this.targetRect
-        this.poperDom = document.createElement('div')
         this.poperStyle = css({
             display: 'block',
             position: 'absolute',
@@ -35,15 +46,24 @@ export default class Poper {
             top: `${top + height}px`,
             left: `${left}px`,
             boxSizing: 'border-box',
-            border: `1px solid red`
+            border: `1px solid red`,
+            minHeight:'0px',
+            maxHeight:'400px',
         })
-        this.poperDom.className = this.poperStyle().className
+        const poperClassName = this.poperStyle().className
+        this.containerVnode = h('div')
+        this.poperVnode = h('div',{
+            class:{
+                [poperClassName]:true,
+                'poper':true
+            }
+        },[this.containerVnode])
     }
     private _mount(){
-        this.softState = true
-        this.containerDom = document.createElement('div')
-        this.poperDom.appendChild(this.containerDom)
-        document.body.appendChild(this.poperDom)
+        // this.softState = true
+        const fullContainerDom = document.createElement('div')
+        patch(fullContainerDom,this.poperVnode)
+        document.body.appendChild(fullContainerDom)
     }
 
     destroy(){
@@ -51,20 +71,39 @@ export default class Poper {
     }
 
     public show(){
-        const {top,height,left} = this.targetRect
-        this.poperDom.className = this.poperStyle({
-            css:{
-                display: 'block'
+        if (this.softState){
+            return
+        }
+        const newPoperVnode = cloneDeep(this.poperVnode)
+        Object.assign(newPoperVnode,{
+            data:{
+                ...newPoperVnode.data,
+                style:{
+                    display:'block'
+                }
             }
-        }).className
+        })
+        patch(this.poperVnode,newPoperVnode)
         this.softState = true
     }
     public hide(){
-        this.softState = false
-        this.poperDom.className = this.poperStyle({
-            css:{
-                display: 'none'
+        console.log(this.softState)
+        if (!this.softState){
+            return
+        }
+        const newPoperVnode = cloneDeep(this.poperVnode)
+        Object.assign(newPoperVnode,{
+            data:{
+                ...newPoperVnode.data,
+                style:{
+                    display:'none'
+                }
             }
-        }).className
+        })
+        patch(this.poperVnode,newPoperVnode)
+        this.softState = false
+    }
+    public resetList(datas){
+        this.virtualList.resetList(datas)
     }
 }

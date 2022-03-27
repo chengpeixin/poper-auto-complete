@@ -26,8 +26,8 @@ export default class VirtualList {
 
     end: null| number
     datas:[]
-    target:HTMLDivElement
 
+    target:VNode
     containerVnode: VNode
     infiniteListVnode: VNode
     itemsVnode: VNode[]
@@ -37,15 +37,18 @@ export default class VirtualList {
     phantomCss: CssComponent
     infiniteListCss: CssComponent
     infiniteListItemCss: CssComponent
+
+    isInit=false
     constructor(datas,target){
         this.datas = datas
         this.target = target
+        this.isInit = true
         this.initDom()
     }
 
     initDom(){
         this.listHeight = this.datas.length * this.itemSize
-        this.screenHeight = this.target.parentElement.clientHeight;
+        this.screenHeight = this.target.elm.parentElement.clientHeight;
         // 需要初始化滚动所需
         this.start = 0
         this.end = this.start + Math.ceil(this.screenHeight / this.itemSize)
@@ -127,8 +130,8 @@ export default class VirtualList {
             },''),
             this.infiniteListVnode
         ])
-
         patch(this.target,this.containerVnode)
+        this.target = this.containerVnode
     }
 
     // 滚动事件
@@ -166,7 +169,7 @@ export default class VirtualList {
                 transform:`translate3d(0,${this.startOffset}px,0)`
             }
         },currentItemsVnode)
-        patch(this.infiniteListVnode,currentInfiniteListVnode)
+        patch(this.target,currentInfiniteListVnode)
         this.infiniteListVnode = currentInfiniteListVnode
     }
     // 获取真实展示列表数据
@@ -175,5 +178,12 @@ export default class VirtualList {
             this.start,
             Math.min(this.end, this.datas.length)
           );
+    }
+
+    // 
+    public resetList(datas){
+        // 重置datas
+        this.datas = datas
+        this.initDom()
     }
 }
