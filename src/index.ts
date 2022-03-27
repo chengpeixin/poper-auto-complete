@@ -2,10 +2,11 @@ import './less/index.less'
 import Poper from './compoents/Poper'
 import { attributesModule, classModule, eventListenersModule, h, init, propsModule, styleModule, VNode } from 'snabbdom'
 import { isChrome } from './util/is'
+import { trim } from 'lodash'
 const testData = []
 for(let i=0;i<100000;i++){
     testData.push({
-        label: i,
+        label: String(i),
         value: i
     })
 }
@@ -56,7 +57,7 @@ export default class AutoComplete {
         this.autoCompleteInput = h('input',{
             on:{
                 'blur':()=>{
-                    this.poper.hide()
+                    // this.poper.hide()
                 },
                 'focus':()=>{
                     this.poper.show()
@@ -65,8 +66,17 @@ export default class AutoComplete {
                     if  (this.onIndirectInput){
                         return
                     }
+                    const value = trim((e.target as HTMLInputElement).value)
+                    var reg = new RegExp(value);
+                    let resultDatas = []
+                    if (value === ''){
 
-                    console.log(e.target.value)
+                    } else {
+                        resultDatas = testData.filter(item=>{
+                            return reg.test(item.label)
+                        })
+                    }
+                    this.poper.resetList(resultDatas)
                 },
                 'compositionstart':(e)=>{
                     this.onIndirectInput = true
