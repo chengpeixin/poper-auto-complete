@@ -101,7 +101,7 @@ export default class VirtualList {
                     [infiniteListItemClassName]: true
                 },
                 on:{
-                    'click':e=>eventBus.emit('click-label-item',e)
+                    click:this.clickListItemHandler
                 }
             },item.label)
         })
@@ -157,6 +157,9 @@ export default class VirtualList {
                 },
                 attrs:{
                     'data-key' : index
+                },
+                on:{
+                    click:this.clickListItemHandler
                 }
             },item.label)
         })
@@ -181,7 +184,12 @@ export default class VirtualList {
           );
     }
 
-    // 
+    // 点击某一项item
+    public clickListItemHandler(e:Event){
+        eventBus.emit('click-label-item',e)
+    }
+
+    // 根据数据重置虚拟列表
     public resetList(datas){
         // 重置datas
         this.datas = datas
