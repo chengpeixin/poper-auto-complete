@@ -1,7 +1,6 @@
 import { css } from '@stitches/core';
 import { CssComponent } from '@stitches/core/types/styled-component';
 import VirtualList from './VirtualList';
-import eventBus from '../util/EventBus'
 import { cloneDeep } from 'lodash'
 import { attributesModule, classModule, eventListenersModule, h, init, propsModule, styleModule, VNode } from 'snabbdom'
 const patch  = init([
@@ -26,9 +25,6 @@ export default class Poper {
         this._getTarget()
         this._initDom()
         this._mount()
-        eventBus.on('click-label-item',(e)=>{
-            console.log(e)
-        })
         this.virtualList = new VirtualList(datas,this.containerVnode)
     }
     private _getTarget(){

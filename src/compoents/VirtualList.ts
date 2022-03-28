@@ -9,6 +9,7 @@ import { h,init,
 import { css } from '@stitches/core';
 import { CssComponent } from '@stitches/core/types/styled-component';
 import eventBus from '../util/EventBus';
+import { Option } from './../types'
 
 const patch  = init([
     classModule,
@@ -25,7 +26,7 @@ export default class VirtualList {
     listHeight=0
 
     end: null| number
-    datas:[]
+    datas:Option[]
 
     target:VNode
     containerVnode: VNode
@@ -39,7 +40,7 @@ export default class VirtualList {
     infiniteListItemCss: CssComponent
 
     isInit=false
-    constructor(datas,target){
+    constructor(datas:Option[],target){
         this.datas = datas
         this.target = target
         this.isInit = true
@@ -95,10 +96,14 @@ export default class VirtualList {
 
         const infiniteListItemClassName = this.infiniteListItemCss().className
         // lable
-        this.itemsVnode = visibleDatas.map(item=>{
+        this.itemsVnode = visibleDatas.map((item:Option)=>{
             return h('div',{
                 class:{
                     [infiniteListItemClassName]: true
+                },
+                attrs:{
+                    'data-value': item.value,
+                    'data-label': item.label
                 },
                 on:{
                     click:this.clickListItemHandler
@@ -150,13 +155,14 @@ export default class VirtualList {
         // 在这里pathch整个渲染列表
         const currentVisibleDatas = this.visibleData();
         // 为避免在scroll事件中频繁创建dom开销，虚拟列表项全部使用vnode
-        const currentItemsVnode = currentVisibleDatas.map((item,index)=>{
+        const currentItemsVnode = currentVisibleDatas.map((item:Option,index)=>{
             return h('div',{
                 class:{
                     [infiniteListItemClassName]: true
                 },
                 attrs:{
-                    'data-key' : index
+                    'data-value': item.value,
+                    'data-label': item.label
                 },
                 on:{
                     click:this.clickListItemHandler
