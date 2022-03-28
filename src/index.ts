@@ -70,7 +70,7 @@ export default class AutoComplete {
                     var reg = new RegExp(value);
                     let resultDatas = []
                     if (value === ''){
-
+                        resultDatas = testData
                     } else {
                         resultDatas = testData.filter(item=>{
                             return reg.test(item.label)
