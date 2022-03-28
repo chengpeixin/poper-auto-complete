@@ -169,7 +169,8 @@ export default class VirtualList {
                 transform:`translate3d(0,${this.startOffset}px,0)`
             }
         },currentItemsVnode)
-        patch(this.target,currentInfiniteListVnode)
+
+        patch(this.infiniteListVnode,currentInfiniteListVnode)
         this.infiniteListVnode = currentInfiniteListVnode
     }
     // 获取真实展示列表数据
