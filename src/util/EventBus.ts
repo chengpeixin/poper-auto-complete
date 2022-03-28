@@ -4,7 +4,6 @@ class EventBus {
   };
   constructor() {
       if ( !EventBus['instance']){
-          console.log('new EventBus')
         this.eventList = {};
         this['instance'] = this
       }
