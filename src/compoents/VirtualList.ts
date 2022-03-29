@@ -21,7 +21,7 @@ const patch  = init([
 export default class VirtualList {
     screenHeight:number
     start=0
-    itemSize=20
+    itemSize=30
     startOffset=0
     listHeight=0
 
@@ -82,15 +82,16 @@ export default class VirtualList {
         const infiniteListClassName = this.infiniteListCss().className
 
         this.infiniteListItemCss = css({
-            padding: '3px',
             color: '#555',
-            'font-size': '13px',
+            'font-size': '14px',
             'cursor':'pointer',
             'box-sizing': 'border-box',
-            'border-bottom': '1px solid #999',
             'height':`${this.itemSize}px`,
+            'line-height':`${this.itemSize}px`,
+            'text-align': 'left',
+            'padding':'0px 4px',
             '&:hover':{
-                backgroundColor: 'SkyBlue'
+                'background-color': '#f5f7fa'
             }
         })
 

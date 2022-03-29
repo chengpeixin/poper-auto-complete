@@ -33,18 +33,22 @@ export default class Poper {
     private _initDom (){
         const {top,height,left,width} = this.targetRect
         this.poperStyle = css({
-            display: 'block',
-            position: 'absolute',
-            width:`${width}px`,
-            height:'400px',
-            transformOrigin: 'center top',
-            zIndex: '100',
-            top: `${top + height}px`,
-            left: `${left}px`,
-            boxSizing: 'border-box',
-            border: `1px solid red`,
-            minHeight:'0px',
-            maxHeight:'400px',
+            'display': 'block',
+            'position': 'absolute',
+            'width':`${width}px`,
+            'height':`210px`,
+            'transform-origin': 'center top',
+            'z-index': '100',
+            'top': `${top + height}px`,
+            'left': `${left}px`,
+            'box-sizing': 'border-box',
+            'min-height':'0px',
+            'max-height':'400px',
+            'border':'1px solid #e4e7ed',
+            'border-radius': '4px',
+            'background-color':'#fff',
+            'box-shadow':'0 2px 12px 0 rgb(0 0 0 / 10%)',
+            'margin':'5px 0'
         })
         const poperClassName = this.poperStyle().className
         this.containerVnode = h('div')

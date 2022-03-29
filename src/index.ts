@@ -46,7 +46,8 @@ export default class AutoComplete {
     autoCompleteContainer:VNode
     autoCompleteTags:VNode
     autoCompleteInputFull:VNode
-    autoCompleteInput:VNode
+    selectInputVnode: VNode
+    inputInnerVnode: VNode
     // 处理中文输入时间接输入导致频繁触发input事件的flag
     onIndirectInput = false
 
@@ -74,55 +75,8 @@ export default class AutoComplete {
         })
     }
     private initVnode(){
-        this.autoCompleteInput = h('input',{
-            on:{
-                'blur':()=>{
-                    // this.poper.hide()
-                },
-                'focus':()=>{
-                    this.poper.show()
-                },
-                'input':(e)=>{
-                    if  (this.onIndirectInput){
-                        return
-                    }
-                    const value = trim((e.target as HTMLInputElement).value)
-                    var reg = new RegExp(value);
-                    if (value === ''){
-                        this.finalDatas = testData
-                    } else {
-                        this.finalDatas = testData.filter(item=>{
-                            return reg.test(item.label)
-                        })
-                    }
-                    this.fitlerShouldShowItemNode()
-                    this.poper.resetList(this.finalDatas)
-                },
-                'compositionstart':(e)=>{
-                    this.onIndirectInput = true
-                },
-                'compositionend':(e)=>{
-                    this.onIndirectInput = false
-                    // chrome触发事件规则与其他浏览器不一致，所以需要单独判断
-                    if ( isChrome() ){
-                        e.target.dispatchEvent(new CustomEvent('input'))
-                    }
-                }
-            },
-            attrs:{
-                type:'text'
-            }
-        })
-        this.autoCompleteInputFull = h('div',{
-            class:{
-                'auto-complete-input-full':true
-            }
-        },[this.autoCompleteInput])
-        this.autoCompleteTags = h('div',{
-            class:{
-                'auto-complete-tags':true
-            }
-        })
+        this.autoCompleteTags = this.createTags()
+        this.autoCompleteInputFull = this.createSuffix()
         this.autoCompleteContainer = h('div',{
             class:{
                 'auto-complete':true
@@ -138,7 +92,7 @@ export default class AutoComplete {
                     if ( this.menuVisibleOnFocus ){
                         this.menuVisibleOnFocus = false
                     }
-                    (this.autoCompleteInput.elm as HTMLInputElement).focus()
+                    (this.selectInputVnode.elm as HTMLInputElement).focus()
                 }
             }
         },[
@@ -150,7 +104,7 @@ export default class AutoComplete {
         this.target.appendChild(this.targetSeat)
     }
     private initPoper(){
-        this.poper = new Poper(this.autoCompleteInput.elm as HTMLDivElement,testData)
+        this.poper = new Poper(this.inputInnerVnode.elm as HTMLDivElement,testData)
 
     }
     
@@ -218,6 +172,68 @@ export default class AutoComplete {
                 },'×'),
             ])
         })
+
+        const selectInputStyle = css({
+            'flex-grow': '1',
+            'width': '0.0961538%',
+            'max-width': '198px',
+            'border': 'none',
+            'outline': 'none',
+            'padding': '0',
+            'margin-left': '15px',
+            'color': '#666',
+            'font-size': '14px',
+            'appearance': 'none',
+            'height': '28px',
+            'background-color': 'transparent'
+        })
+        const selectInputClassName = selectInputStyle().className
+        const selectInputVnode = h('input',{
+            on:{
+                'blur':()=>{
+                    // this.poper.hide()
+                },
+                'focus':()=>{
+                    this.poper.show()
+                },
+                'input':(e)=>{
+                    if  (this.onIndirectInput){
+                        return
+                    }
+                    const value = trim((e.target as HTMLInputElement).value)
+                    var reg = new RegExp(value);
+                    if (value === ''){
+                        this.finalDatas = testData
+                    } else {
+                        this.finalDatas = testData.filter(item=>{
+                            return reg.test(item.label)
+                        })
+                    }
+                    this.fitlerShouldShowItemNode()
+                    this.poper.resetList(this.finalDatas)
+                },
+                'compositionstart':(e)=>{
+                    this.onIndirectInput = true
+                },
+                'compositionend':(e)=>{
+                    this.onIndirectInput = false
+                    // chrome触发事件规则与其他浏览器不一致，所以需要单独判断
+                    if ( isChrome() ){
+                        e.target.dispatchEvent(new CustomEvent('input'))
+                    }
+                }
+            },
+            class:{
+                [selectInputClassName]:true
+            },
+            attrs:{
+                type:'text',
+                autocomplete: 'off',
+                placeholder:'',
+                tabindex: '-1'
+            }
+        })
+        this.selectInputVnode = selectInputVnode
         return h('div',{
             style:{
                 'display':'flex',
@@ -239,8 +255,62 @@ export default class AutoComplete {
                 }
             },[
                 ...tags
-            ])
+            ]),
+            selectInputVnode
         ])
+    }
+
+    // 创建suffix
+    private createSuffix(){
+        const inputInnerStyle = css({
+            'cursor': 'pointer',
+            'padding-right':'30px',
+            '-webkit-appearance':'none',
+            'background-color': '#fff',
+            'background-image': 'none',
+            'border-radius': '4px',
+            'border': '1px solid #dcdfe6',
+            'box-sizing': 'border-box',
+            'color': '#606266',
+            'display': 'inline-block',
+            'font-size': 'inherit',
+            'height': '40px',
+            'line-height': '40px',
+            'outline': 'none',
+            'padding': '0 15px',
+            'transition': 'border-color .2s cubic-bezier(.645,.045,.355,1)',
+            'width': '100%'
+        })
+        const inputInnerClassName = inputInnerStyle().className
+        const inputSuffixStyle = css({
+            'display':'block',
+            'position': 'relative',
+            'font-size': '14px',
+            'width': '100%'
+        })
+        const inputInnerVnode = h('input',{
+            class:{
+                [inputInnerClassName]:true
+            },
+            attrs:{
+                readonly: 'readonly',
+                tabindex: '-1',
+                type: 'text',
+                autocomplete: 'off',
+                placeholder: ''
+            }
+        })
+        this.inputInnerVnode = inputInnerVnode
+        const inputSuffixClassName = inputSuffixStyle().className
+        const inputSuffixVnode = h('div',{
+            class:{
+                [inputSuffixClassName]: true
+            }
+        },[
+            inputInnerVnode
+        ])
+
+        return inputSuffixVnode
     }
     
     // 将选中的和当前数据进行过滤
