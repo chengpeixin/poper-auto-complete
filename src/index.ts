@@ -6,6 +6,7 @@ import { trim } from 'lodash'
 import { Option } from './types'
 import eventBus from './util/EventBus'
 import { css } from '@stitches/core'
+import { cloneDeep } from 'lodash'
 const testData:Option[] = []
 for(let i=0;i<10;i++){
     testData.push({
@@ -57,21 +58,33 @@ export default class AutoComplete {
 
     constructor(target:HTMLDivElement){
         this.target = target
-        this.finalDatas = testData
+        this.setupFinalDatas(testData)
         this.initVnode();
         this.initPoper()
         eventBus.on('click-label-item',(e:Event)=>{
-            const value = (e.target as HTMLDivElement).dataset['value']
-            const label = (e.target as HTMLDivElement).dataset['label']
+            const {value,label,index} = (e.target as HTMLDivElement).dataset
             this.selectd.push({
                 value,
-                label
+                label,
+                index:Number(index)
             })
             this.fitlerShouldShowItemNode()
             const tagVnode = this.createTags()
             patch(this.autoCompleteTags,tagVnode)
             this.autoCompleteTags = tagVnode
             this.poper.resetList(this.finalDatas)
+            this.resetInputHeight()
+            this.poper.resetPosition()
+        })
+    }
+    private setupFinalDatas (finalDatas:Option[]) {
+        this.finalDatas =  cloneDeep(finalDatas).map((option:Option,index)=>{
+            const opt = Object.create(null)
+            return Object.assign(opt,{
+                ...option,
+                index,
+                effective:true
+            })
         })
     }
     private initVnode(){
@@ -105,7 +118,6 @@ export default class AutoComplete {
     }
     private initPoper(){
         this.poper = new Poper(this.inputInnerVnode.elm as HTMLDivElement,testData)
-
     }
     
     // 创建tags
@@ -155,24 +167,47 @@ export default class AutoComplete {
                 'background-color':'#909399'
             }
         })
-
         const closeIconClassName = closeIconStyle().className
         const tagClassName = tagStyle().className
-        const tags = this.selectd.map(item=>{
+        const createCloseIconVnode = (option:Option) => {
+            return h('span',{
+                on:{
+                    click:(e)=>{
+                        const value = (e.target as HTMLElement).dataset['value']
+                        const index = this.selectd.findIndex(item=>item.value == value)
+                        if (index!==-1){
+                            // 如果大数据，这里应该减少计算
+                            const option = this.selectd[index]
+                            this.finalDatas.splice(option.index,0,option)
+                            this.selectd.splice(index,1)
+                            this.fitlerShouldShowItemNode()
+                            const newTagsVnode = this.createTags()
+                            patch(this.autoCompleteTags,newTagsVnode)
+                            this.autoCompleteTags = newTagsVnode
+                            this.poper.resetList(this.finalDatas)
+                            this.resetInputHeight()
+                            this.poper.resetPosition()
+                        }
+                    }
+                },
+                attrs:{
+                    'data-value': option.value
+                },
+                class:{
+                    [closeIconClassName]:true
+                }
+            },'×')
+        }
+        const tags = this.selectd.map((item:Option)=>{
             return h('span',{
                 class:{
                     [tagClassName]:true
                 }
             },[
                 h('span',{},item.label),
-                h('span',{
-                    class:{
-                        [closeIconClassName]:true
-                    }
-                },'×'),
+                createCloseIconVnode(item)
             ])
         })
-
         const selectInputStyle = css({
             'flex-grow': '1',
             'width': '0.0961538%',
@@ -331,6 +366,20 @@ export default class AutoComplete {
             this.finalDatas.splice(finalIndex,1)
             i=i+1;
         }
+        this.finalDatas.sort((a,b)=>a.index-b.index)
+    }
+
+    // 重置选择器框高度
+    private resetInputHeight(){
+        const tagsHeight = Math.round(this.autoCompleteTags.elm.getBoundingClientRect().height)
+        const initialInputHeight = 40
+        let inputHeight = initialInputHeight
+        if (this.selectd.length !== 0){
+            inputHeight = Math.max(
+                tagsHeight > initialInputHeight? tagsHeight + (tagsHeight>initialInputHeight? 6 : 0): initialInputHeight
+            )
+        }
+        this.inputInnerVnode.elm.style.height = `${inputHeight}px`
     }
 }
 

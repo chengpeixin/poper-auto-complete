@@ -3,6 +3,7 @@ import { CssComponent } from '@stitches/core/types/styled-component';
 import VirtualList from './VirtualList';
 import { cloneDeep } from 'lodash'
 import { attributesModule, classModule, eventListenersModule, h, init, propsModule, styleModule, VNode } from 'snabbdom'
+
 const patch  = init([
     classModule,
     propsModule,
@@ -105,5 +106,26 @@ export default class Poper {
     }
     public resetList(datas){
         this.virtualList.resetList(datas)
+    }
+
+    // 重置poper位置
+    public resetPosition(){
+        this._getTarget()
+        const {top,height,left,width} = this.targetRect
+        this.poperVnode.elm.style.top = `${top+height}px`
+    }
+
+    private createNoData(){
+        const noDataSeatStyle = css({
+            'color': '#999',
+            'font-size': '14px',
+            'text-align': 'center'
+        })
+        const noDataSeatClassName = noDataSeatStyle.className
+        return h('div',{
+            class:{
+                [noDataSeatClassName]:true
+            }
+        },'无数据')
     }
 }

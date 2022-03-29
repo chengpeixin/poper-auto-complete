@@ -104,7 +104,8 @@ export default class VirtualList {
                 },
                 attrs:{
                     'data-value': item.value,
-                    'data-label': item.label
+                    'data-label': item.label,
+                    'data-index': item.index
                 },
                 on:{
                     click:this.clickListItemHandler
@@ -163,7 +164,8 @@ export default class VirtualList {
                 },
                 attrs:{
                     'data-value': item.value,
-                    'data-label': item.label
+                    'data-label': item.label,
+                    'data-index': item.index
                 },
                 on:{
                     click:this.clickListItemHandler
