@@ -68,6 +68,8 @@ export default class AutoComplete {
                 label,
                 index:Number(index)
             })
+            this.menuVisibleOnFocus = true
+            this.selectInputVnode.elm.focus()
             this.fitlerShouldShowItemNode()
             const tagVnode = this.createTags()
             patch(this.autoCompleteTags,tagVnode)
@@ -226,9 +228,12 @@ export default class AutoComplete {
         const selectInputVnode = h('input',{
             on:{
                 'blur':()=>{
-                    // this.poper.hide()
+                    if (!this.menuVisibleOnFocus){
+                        this.poper.hide()
+                    }
                 },
                 'focus':()=>{
+                    this.menuVisibleOnFocus = true
                     this.poper.show()
                 },
                 'input':(e)=>{

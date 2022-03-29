@@ -88,7 +88,6 @@ export default class Poper {
         this.softState = true
     }
     public hide(){
-        console.log(this.softState)
         if (!this.softState){
             return
         }
