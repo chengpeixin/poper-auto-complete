@@ -50,7 +50,7 @@ export default class AutoComplete {
     constructor(target:HTMLDivElement,opts:Opts){
         this.target = target
         this.opts = opts
-        this.setupFinalDatas(testData)
+        this.setupFinalDatas(opts.options)
         this.initVnode();
         this.initPoper()
         eventBus.on('click-label-item',(e:Event)=>{
@@ -63,8 +63,7 @@ export default class AutoComplete {
             this.isClickLabel = true
             this.visible = true
             this.menuVisibleOnFocus = true
-
-            // 修改数据并patch dom
+            // 修改数据并patch tags
             this.fitlerShouldShowItemNode()
             const tagVnode = this.createTags()
             patch(this.autoCompleteTags,tagVnode)
@@ -79,6 +78,8 @@ export default class AutoComplete {
             this.setSoftFocus()
         })
     }
+
+    // 对传入数据进行初始化操作
     private setupFinalDatas (finalDatas:Option[]) {
         this.options = finalDatas
         this.finalDatas =  cloneDeep(finalDatas).map((option:Option,index)=>{
@@ -103,9 +104,7 @@ export default class AutoComplete {
                 'position':'relative'
             },
             on:{
-                'click':(e)=>{
-                    this.toggleMenu(e)
-                }
+                'click': this.toggleMenu.bind(this)
             }
         },[
             this.autoCompleteTags,
@@ -147,15 +146,16 @@ export default class AutoComplete {
             'display':'flex',
             'max-width':'100%',
             'align-items':'center',
-            'height': '24px',
+            'height': '30px',
             'padding': '0 8px',
             'line-height': '22px',
-            'font-size':'12px',
+            'font-size':'14px',
             'border': '1px solid #d9ecff',
             'border-radius': '4px',
             'white-space': 'nowrap'
         })
         const closeIconStyle = css({
+            'padding':'3px',
             'color':'#909399',
             'background-color':'#c0c4cc',
             'top':'0',
@@ -165,7 +165,7 @@ export default class AutoComplete {
             'text-align':'center',
             'position':'relative',
             'cursor':'pointer',
-            'font-size':'12px',
+            'font-size':'14px',
             'height':'16px',
             'width':'16px',
             'line-height':'16px',
@@ -188,23 +188,7 @@ export default class AutoComplete {
         const createCloseIconVnode = (option:Option) => {
             return h('span',{
                 on:{
-                    click:(e)=>{
-                        const value = (e.target as HTMLElement).dataset['value']
-                        const index = this.selectd.findIndex(item=>item.value == value)
-                        if (index!==-1){
-                            // 如果大数据，这里应该减少计算
-                            const option = this.selectd[index]
-                            this.finalDatas.splice(option.index,0,option)
-                            this.selectd.splice(index,1)
-                            this.fitlerShouldShowItemNode()
-                            const newTagsVnode = this.createTags()
-                            patch(this.autoCompleteTags,newTagsVnode)
-                            this.autoCompleteTags = newTagsVnode
-                            this.poper.resetList(this.finalDatas)
-                            this.resetInputHeight()
-                            this.poper.resetPosition()
-                        }
-                    }
+                    click: this.removeTag.bind(this)
                 },
                 attrs:{
                     'data-value': option.value
@@ -246,13 +230,7 @@ export default class AutoComplete {
                         this.poper.hide()
                     }
                 },
-                'focus':()=>{
-                    this.handlerFocus()
-                    this.menuVisibleOnFocus = true
-                    if ( this.visible ){
-                        this.poper.show()
-                    }
-                },
+                'focus':this.handlerFocus.bind(this),
                 'input':(e)=>{
                     if  (this.onIndirectInput){
                         return
@@ -323,8 +301,8 @@ export default class AutoComplete {
             'color': '#606266',
             'display': 'inline-block',
             'font-size': 'inherit',
-            'height': '40px',
-            'line-height': '40px',
+            'height': `${this.opts.height}px`,
+            'line-height': `${this.opts.height}px`,
             'outline': 'none',
             'padding': '0 15px',
             'transition': 'border-color .2s cubic-bezier(.645,.045,.355,1)',
@@ -349,7 +327,7 @@ export default class AutoComplete {
                 placeholder: ''
             },
             on:{
-                'focus':this.handlerFocus
+                'focus':this.handlerFocus.bind(this)
             }
         })
         this.inputInnerVnode = inputInnerVnode
@@ -400,14 +378,18 @@ export default class AutoComplete {
 
     // 触发focus
     private handlerFocus (){
-        if ( !this.softFocus ){
-            if ( !this.visible ){
-                this.menuVisibleOnFocus = true
-            }
-            this.visible = true
-        } else {
-            this.softFocus = false
+        if ( !this.visible ){
+            this.poper.show()
         }
+        this.visible = true
+        // if ( !this.softFocus ){
+        //     if ( !this.visible ){
+        //         this.menuVisibleOnFocus = true
+        //     }
+        //     this.visible = true
+        // } else {
+        //     this.softFocus = false
+        // }
     }
 
 
@@ -419,13 +401,36 @@ export default class AutoComplete {
     // 点击选择框控件
     private toggleMenu(e){
         e.stopPropagation()
-        if ( this.menuVisibleOnFocus ) {
-            this.menuVisibleOnFocus = false
-        } else {
-            this.visible = !this.visible
-        }
-        if ( this.visible ){
+        if ( !this.visible ){
             (this.selectInputVnode.elm as HTMLInputElement).focus()
+        }
+        // if ( this.menuVisibleOnFocus ) {
+        //     this.menuVisibleOnFocus = false
+        // } else {
+        //     this.visible = !this.visible
+        // }
+        // if ( this.visible ){
+        //     (this.selectInputVnode.elm as HTMLInputElement).focus()
+        // }
+    }
+
+    // 从tags中删除
+    private removeTag(e:Event) {
+        e.stopPropagation();
+        const value = (e.target as HTMLElement).dataset['value']
+        const index = this.selectd.findIndex(item=>item.value == value)
+        if (index!==-1){
+            // 如果大数据，这里应该减少计算
+            const option = this.selectd[index]
+            this.finalDatas.splice(option.index,0,option)
+            this.selectd.splice(index,1)
+            this.fitlerShouldShowItemNode()
+            const newTagsVnode = this.createTags()
+            patch(this.autoCompleteTags,newTagsVnode)
+            this.autoCompleteTags = newTagsVnode
+            this.poper.resetList(this.finalDatas)
+            this.resetInputHeight()
+            this.poper.resetPosition()
         }
     }
     
