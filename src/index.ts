@@ -7,6 +7,7 @@ import { Option } from './types'
 import eventBus from './util/EventBus'
 import { css } from '@stitches/core'
 import { cloneDeep } from 'lodash'
+import clickoutside from './../src/util/clickoutside'
 const testData:Option[] = []
 for(let i=0;i<10;i++){
     testData.push({
@@ -43,6 +44,10 @@ export default class AutoComplete {
     targetSeat = document.createElement('div')
     // 
     menuVisibleOnFocus=false
+    // 控制poper是否展示
+    visible=false
+    // 
+    softFocus=false
     poper:Poper
     autoCompleteContainer:VNode
     autoCompleteTags:VNode
@@ -69,7 +74,6 @@ export default class AutoComplete {
                 index:Number(index)
             })
             this.menuVisibleOnFocus = true
-            this.selectInputVnode.elm.focus()
             this.fitlerShouldShowItemNode()
             const tagVnode = this.createTags()
             patch(this.autoCompleteTags,tagVnode)
@@ -77,6 +81,8 @@ export default class AutoComplete {
             this.poper.resetList(this.finalDatas)
             this.resetInputHeight()
             this.poper.resetPosition()
+            this.selectInputVnode.elm.focus()
+            setTimeout(this.setSoftFocus.bind(this),50)
         })
     }
     private setupFinalDatas (finalDatas:Option[]) {
@@ -103,11 +109,7 @@ export default class AutoComplete {
             },
             on:{
                 'click':(e)=>{
-                    e.stopPropagation()
-                    if ( this.menuVisibleOnFocus ){
-                        this.menuVisibleOnFocus = false
-                    }
-                    (this.selectInputVnode.elm as HTMLInputElement).focus()
+                    this.toggleMenu(e)
                 }
             }
         },[
@@ -116,6 +118,16 @@ export default class AutoComplete {
         ])
         patch(this.targetSeat,this.autoCompleteContainer)
         this.target.innerHTML = ''
+        clickoutside(this.autoCompleteContainer.elm as HTMLElement,()=>{
+            this.selectInputVnode.elm.value = ''
+            this.menuVisibleOnFocus = false
+            this.visible = false
+            this.resetShouldItemByfitlerValue()
+            this.fitlerShouldShowItemNode()
+            this.poper.resetList(this.finalDatas)
+            this.selectInputVnode.elm.blur()
+            this.poper.hide()
+        })
         this.target.appendChild(this.targetSeat)
     }
     private initPoper(){
@@ -228,11 +240,12 @@ export default class AutoComplete {
         const selectInputVnode = h('input',{
             on:{
                 'blur':()=>{
-                    if (!this.menuVisibleOnFocus){
+                    if ( !this.visible ){
                         this.poper.hide()
                     }
                 },
                 'focus':()=>{
+                    this.handlerFocus()
                     this.menuVisibleOnFocus = true
                     this.poper.show()
                 },
@@ -240,15 +253,7 @@ export default class AutoComplete {
                     if  (this.onIndirectInput){
                         return
                     }
-                    const value = trim((e.target as HTMLInputElement).value)
-                    var reg = new RegExp(value);
-                    if (value === ''){
-                        this.finalDatas = testData
-                    } else {
-                        this.finalDatas = testData.filter(item=>{
-                            return reg.test(item.label)
-                        })
-                    }
+                    this.resetShouldItemByfitlerValue()
                     this.fitlerShouldShowItemNode()
                     this.poper.resetList(this.finalDatas)
                 },
@@ -338,6 +343,9 @@ export default class AutoComplete {
                 type: 'text',
                 autocomplete: 'off',
                 placeholder: ''
+            },
+            on:{
+                'focus':this.handlerFocus
             }
         })
         this.inputInnerVnode = inputInnerVnode
@@ -373,6 +381,50 @@ export default class AutoComplete {
         }
         this.finalDatas.sort((a,b)=>a.index-b.index)
     }
+
+    // 根据当前fltler输入值过滤
+    private resetShouldItemByfitlerValue(){
+        const value = trim(this.selectInputVnode.elm && this.selectInputVnode.elm.value || '')
+        var reg = new RegExp(value);
+        if (value === ''){
+            this.finalDatas = testData
+        } else {
+            this.finalDatas = testData.filter(item=>reg.test(item.label))
+        }
+    }
+
+
+    // 触发focus
+    private handlerFocus (){
+        if ( !this.softFocus ){
+            if ( !this.visible ){
+                this.menuVisibleOnFocus = true
+            }
+            this.visible = true
+        } else {
+            this.softFocus = false
+        }
+    }
+
+
+    private setSoftFocus(){
+        // this.softFocus = true
+        this.selectInputVnode.elm && this.selectInputVnode.elm.focus()
+    }
+
+    // 点击选择框控件
+    private toggleMenu(e){
+        e.stopPropagation()
+        if ( this.menuVisibleOnFocus ) {
+            this.menuVisibleOnFocus = false
+        } else {
+            this.visible = !this.visible
+        }
+        if ( this.visible ){
+            (this.selectInputVnode.elm as HTMLInputElement).focus()
+        }
+    }
+    
 
     // 重置选择器框高度
     private resetInputHeight(){
