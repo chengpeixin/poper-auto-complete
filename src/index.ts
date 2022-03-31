@@ -3,18 +3,12 @@ import Poper from './compoents/Poper'
 import { attributesModule, classModule, eventListenersModule, h, init, propsModule, styleModule, VNode } from 'snabbdom'
 import { isChrome } from './util/is'
 import { trim } from 'lodash'
-import { Option } from './types'
+import { Option, Opts } from './types'
 import eventBus from './util/EventBus'
 import { css } from '@stitches/core'
 import { cloneDeep } from 'lodash'
 import clickoutside from './../src/util/clickoutside'
-const testData:Option[] = []
-for(let i=0;i<10;i++){
-    testData.push({
-        label: `${i}hcdfj`,
-        value: String(i)
-    })
-}
+
 /**
  *  @focus="handleFocus"
     @blur="softFocus = false"
@@ -60,10 +54,12 @@ export default class AutoComplete {
     // 当前已选择的key
     selectd=[]
     finalDatas = []
-
-    constructor(target:HTMLDivElement){
+    options = []
+    opts:Opts
+    constructor(target:HTMLDivElement,opts:Opts){
         this.target = target
-        this.setupFinalDatas(testData)
+        this.opts = opts
+        this.setupFinalDatas(opts.options)
         this.initVnode();
         this.initPoper()
         eventBus.on('click-label-item',(e:Event)=>{
@@ -86,6 +82,7 @@ export default class AutoComplete {
         })
     }
     private setupFinalDatas (finalDatas:Option[]) {
+        this.options = finalDatas
         this.finalDatas =  cloneDeep(finalDatas).map((option:Option,index)=>{
             const opt = Object.create(null)
             return Object.assign(opt,{
@@ -103,7 +100,7 @@ export default class AutoComplete {
                 'auto-complete':true
             },
             style:{
-                'width': '240px',
+                'width': `${this.opts.width}px`,
                 'display':'inline-block',
                 'position':'relative'
             },
@@ -131,7 +128,7 @@ export default class AutoComplete {
         this.target.appendChild(this.targetSeat)
     }
     private initPoper(){
-        this.poper = new Poper(this.selectInputVnode.elm as HTMLDivElement,testData)
+        this.poper = new Poper(this.selectInputVnode.elm as HTMLDivElement,this.finalDatas)
     }
     
     // 创建tags
@@ -285,7 +282,7 @@ export default class AutoComplete {
             style:{
                 'display':'flex',
                 'width':'100%',
-                'max-width':'208px',
+                'max-width':`${this.opts.width}px`,
                 'position':'absolute',
                 'line-height': 'normal',
                 'white-space': 'normal',
@@ -389,9 +386,9 @@ export default class AutoComplete {
         const value = trim(this.selectInputVnode.elm && this.selectInputVnode.elm.value || '')
         var reg = new RegExp(value);
         if (value === ''){
-            this.finalDatas = testData
+            this.finalDatas = this.options
         } else {
-            this.finalDatas = testData.filter(item=>reg.test(item.label))
+            this.finalDatas = this.options.filter(item=>reg.test(item.label))
         }
     }
 
