@@ -4,3 +4,8 @@ export type Option =  {
     index: number
     effective: boolean
 }
+
+export type Opts = {
+    options:Option[]
+    width:number
+}
