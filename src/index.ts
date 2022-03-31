@@ -45,6 +45,8 @@ export default class AutoComplete {
     finalDatas = []
     options = []
     opts:Opts
+    // 当前是否搜索状态
+    isClickLabel=false
     constructor(target:HTMLDivElement,opts:Opts){
         this.target = target
         this.opts = opts
@@ -53,21 +55,27 @@ export default class AutoComplete {
         this.initPoper()
         eventBus.on('click-label-item',(e:Event)=>{
             const {value,label,index} = (e.target as HTMLDivElement).dataset
-            console.log(value)
             this.selectd.push({
                 value,
                 label,
                 index:Number(index)
             })
+            this.isClickLabel = true
             this.visible = true
             this.menuVisibleOnFocus = true
+
+            // 修改数据并patch dom
             this.fitlerShouldShowItemNode()
             const tagVnode = this.createTags()
             patch(this.autoCompleteTags,tagVnode)
             this.autoCompleteTags = tagVnode
+            // 重置待选项列表
             this.poper.resetList(this.finalDatas)
+            // 重置高度
             this.resetInputHeight()
+            // 重置poper位置
             this.poper.resetPosition()
+            // 重置focus事件
             this.setSoftFocus()
         })
     }
@@ -106,14 +114,21 @@ export default class AutoComplete {
         patch(this.targetSeat,this.autoCompleteContainer)
         this.target.innerHTML = ''
         clickoutside(this.autoCompleteContainer.elm as HTMLElement,()=>{
-            this.poper.hide()
-            this.selectInputVnode.elm.value = ''
-            this.menuVisibleOnFocus = false
-            this.visible = false
-            this.resetShouldItemByfitlerValue()
-            this.fitlerShouldShowItemNode()
-            this.poper.resetList(this.finalDatas)
-            this.selectInputVnode.elm.blur()
+            setTimeout(()=>{
+                // 判断是否点击的是父级元素
+                if ( !this.isClickLabel ){
+                    this.poper.hide()
+                    this.selectInputVnode.elm.value = ''
+                    this.menuVisibleOnFocus = false
+                    this.visible = false
+                    this.resetShouldItemByfitlerValue()
+                    this.fitlerShouldShowItemNode()
+                    this.poper.resetList(this.finalDatas)
+                    this.selectInputVnode.elm.blur()
+                } else {
+                    this.isClickLabel = false
+                }
+            },50)
         })
         this.target.appendChild(this.targetSeat)
     }
@@ -426,6 +441,11 @@ export default class AutoComplete {
             )
         }
         this.inputInnerVnode.elm.style.height = `${inputHeight}px`
+    }
+
+    // 获取当前输入框内容
+    private getFitlerValue (){
+        return trim((this.selectInputVnode.elm as HTMLInputElement).value)
     }
 }
 
