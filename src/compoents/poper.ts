@@ -1,7 +1,7 @@
 import { css } from '@stitches/core';
 import { CssComponent } from '@stitches/core/types/styled-component';
 import VirtualList from './VirtualList';
-import { cloneDeep,debounce } from 'lodash'
+import { cloneDeep } from 'lodash'
 import { attributesModule, classModule, eventListenersModule, h, init, propsModule, styleModule, VNode } from 'snabbdom'
 
 const patch  = init([
@@ -21,6 +21,7 @@ export default class Poper {
     containerVnode:VNode
     poperVnode:VNode
     stateFlag = false
+    width=200
     constructor(target:HTMLDivElement,datas,opts={}){
         this.target = target
         this._getTarget()
@@ -32,13 +33,13 @@ export default class Poper {
         this.targetRect = this.target.getBoundingClientRect()
     }
     private _initDom (){
-        const {top,height,left,width} = this.targetRect
+        const {top,height,left} = this.targetRect
         this.poperStyle = css({
             'display': 'block',
             'visibility':'hidden',
             'position': 'absolute',
-            'width':`${width}px`,
-            'height':`210px`,
+            'width':`${this.width}px`,
+            'height':`200px`,
             'transform-origin': 'center top',
             'z-index': '100',
             'top': `${top + height}px`,
@@ -70,24 +71,20 @@ export default class Poper {
         document.body.appendChild(fullContainerDom)
     }
 
-    destroy(){
-
-    }
-
     public show(){
         if ( this.stateFlag ){
             return
         }
-        this._getTarget()
+        const x = this.getXPosition()
         const newPoperVnode = cloneDeep(this.poperVnode)
-        const { top,left } = this.targetRect
+        const { top } = this.targetRect
         Object.assign(newPoperVnode,{
             data:{
                 ...newPoperVnode.data,
                 style:{
                     'display':'block',
                     'visibility':'visible',
-                    'left': `${left}px`,
+                    'left': `${x}px`,
                     'top':`${top+20}px`
                 }
             }
@@ -100,16 +97,16 @@ export default class Poper {
         if ( !this.stateFlag ){
             return
         }
-        this._getTarget()
+        const x = this.getXPosition()
         const newPoperVnode = cloneDeep(this.poperVnode)
-        const { top,left } = this.targetRect
+        const { top } = this.targetRect
         Object.assign(newPoperVnode,{
             data:{
                 ...newPoperVnode.data,
                 style:{
                     'display':'none',
                     'visibility':'hidden',
-                    'left': `${left}px`,
+                    'left': `${x}px`,
                     'top':`${top+20}px`
                 }
             }
@@ -124,10 +121,10 @@ export default class Poper {
 
     // 重置poper位置
     public resetPosition(){
-        this._getTarget()
-        const {top,height,left,width} = this.targetRect
+        const x = this.getXPosition()
+        const {top,height} = this.targetRect
         this.poperVnode.elm.style.top = `${top+height}px`
-        this.poperVnode.elm.style.left = `${left}px`
+        this.poperVnode.elm.style.left = `${x}px`
     }
 
     private createNoData(){
@@ -142,5 +139,14 @@ export default class Poper {
                 [noDataSeatClassName]:true
             }
         },'无数据')
+    }
+
+    // 获取当前应该的x位置
+    private getXPosition(){
+        this._getTarget()
+        const {left} = this.targetRect
+        const visibleAareaX = window.innerWidth
+        const leftXPosition = this.width + left
+        return leftXPosition > visibleAareaX ? (visibleAareaX - this.width):left
     }
 }

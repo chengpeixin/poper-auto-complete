@@ -13,7 +13,7 @@
 
 <script>
 const testData = []
-for(let i=0;i<10;i++){
+for(let i=0;i<100;i++){
     testData.push({
         label: `${i}hcdfj`,
         value: String(i)
@@ -22,7 +22,8 @@ for(let i=0;i<10;i++){
     window.onload = function(){
         new AutoComplete(document.querySelector('#xxx'),{
             options:testData,
-            width:window.innerWidth
+            width:window.innerWidth,
+            height:200
         })
     }
 </script>

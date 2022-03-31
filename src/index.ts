@@ -8,24 +8,13 @@ import eventBus from './util/EventBus'
 import { css } from '@stitches/core'
 import { cloneDeep } from 'lodash'
 import clickoutside from './../src/util/clickoutside'
-
-/**
- *  @focus="handleFocus"
-    @blur="softFocus = false"
-    @keyup="managePlaceholder"
-    @keydown="resetInputState"
-    @keydown.down.prevent="handleNavigate('next')"
-    @keydown.up.prevent="handleNavigate('prev')"
-    @keydown.enter.prevent="selectOption"
-    @keydown.esc.stop.prevent="visible = false"
-    @keydown.delete="deletePrevTag"
-    @keydown.tab="visible = false"
-    @compositionstart="handleComposition"
-    @compositionupdate="handleComposition"
-    @compositionend="handleComposition"
- * 
- */
-
+const testData:Option[] = []
+for(let i=0;i<10;i++){
+    testData.push({
+        label: `${i}hcdfj`,
+        value: String(i)
+    })
+}
 const patch  = init([
     classModule,
     propsModule,
@@ -59,11 +48,12 @@ export default class AutoComplete {
     constructor(target:HTMLDivElement,opts:Opts){
         this.target = target
         this.opts = opts
-        this.setupFinalDatas(opts.options)
+        this.setupFinalDatas(testData)
         this.initVnode();
         this.initPoper()
         eventBus.on('click-label-item',(e:Event)=>{
             const {value,label,index} = (e.target as HTMLDivElement).dataset
+            console.log(value)
             this.selectd.push({
                 value,
                 label,
@@ -128,7 +118,7 @@ export default class AutoComplete {
         this.target.appendChild(this.targetSeat)
     }
     private initPoper(){
-        this.poper = new Poper(this.selectInputVnode.elm as HTMLDivElement,this.finalDatas)
+        this.poper = new Poper(this.selectInputVnode.elm as HTMLDivElement,this.options)
     }
     
     // 创建tags
