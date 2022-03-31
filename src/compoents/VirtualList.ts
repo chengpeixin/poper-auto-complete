@@ -49,7 +49,7 @@ export default class VirtualList {
 
     initDom(){
         this.listHeight = this.datas.length * this.itemSize
-        this.screenHeight = this.target.elm.parentElement.clientHeight;
+        this.screenHeight = this.target.elm.parentElement.clientHeight||300;
         // 需要初始化滚动所需
         this.start = 0
         this.end = this.start + Math.ceil(this.screenHeight / this.itemSize)

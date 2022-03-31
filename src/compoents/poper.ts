@@ -16,7 +16,6 @@ export default class Poper {
     target:HTMLDivElement
     containerDom:HTMLDivElement
     targetRect:DOMRect
-    softState = false
     poperStyle:CssComponent
     virtualList: VirtualList
     containerVnode:VNode
@@ -35,6 +34,7 @@ export default class Poper {
         const {top,height,left,width} = this.targetRect
         this.poperStyle = css({
             'display': 'block',
+            'visibility':'hidden',
             'position': 'absolute',
             'width':`${width}px`,
             'height':`210px`,
@@ -49,7 +49,8 @@ export default class Poper {
             'border-radius': '4px',
             'background-color':'#fff',
             'box-shadow':'0 2px 12px 0 rgb(0 0 0 / 10%)',
-            'margin':'5px 0'
+            'margin':'5px 0',
+            // 'display': 'none'
         })
         const poperClassName = this.poperStyle().className
         this.containerVnode = h('div')
@@ -57,11 +58,13 @@ export default class Poper {
             class:{
                 [poperClassName]:true,
                 'poper':true
+            },
+            style:{
+                // "display":'none'
             }
         },[this.containerVnode])
     }
     private _mount(){
-        // this.softState = true
         const fullContainerDom = document.createElement('div')
         patch(fullContainerDom,this.poperVnode)
         document.body.appendChild(fullContainerDom)
@@ -72,36 +75,32 @@ export default class Poper {
     }
 
     public show(){
-        if (this.softState){
-            return
-        }
         const newPoperVnode = cloneDeep(this.poperVnode)
         Object.assign(newPoperVnode,{
             data:{
                 ...newPoperVnode.data,
                 style:{
-                    display:'block'
+                    display:'block',
+                    'visibility':'visible'
                 }
             }
         })
         patch(this.poperVnode,newPoperVnode)
-        this.softState = true
+        this.poperVnode = newPoperVnode
     }
     public hide(){
-        if (!this.softState){
-            return
-        }
         const newPoperVnode = cloneDeep(this.poperVnode)
         Object.assign(newPoperVnode,{
             data:{
                 ...newPoperVnode.data,
                 style:{
-                    display:'none'
+                    'display':'none',
+                    'visibility':'hidden'
                 }
             }
         })
         patch(this.poperVnode,newPoperVnode)
-        this.softState = false
+        this.poperVnode = newPoperVnode
     }
     public resetList(datas){
         this.virtualList.resetList(datas)
