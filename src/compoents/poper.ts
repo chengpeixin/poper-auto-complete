@@ -1,7 +1,7 @@
 import { css } from '@stitches/core';
 import { CssComponent } from '@stitches/core/types/styled-component';
 import VirtualList from './VirtualList';
-import { cloneDeep } from 'lodash'
+import { cloneDeep,debounce } from 'lodash'
 import { attributesModule, classModule, eventListenersModule, h, init, propsModule, styleModule, VNode } from 'snabbdom'
 
 const patch  = init([
@@ -20,6 +20,7 @@ export default class Poper {
     virtualList: VirtualList
     containerVnode:VNode
     poperVnode:VNode
+    stateFlag = false
     constructor(target:HTMLDivElement,datas,opts={}){
         this.target = target
         this._getTarget()
@@ -49,8 +50,7 @@ export default class Poper {
             'border-radius': '4px',
             'background-color':'#fff',
             'box-shadow':'0 2px 12px 0 rgb(0 0 0 / 10%)',
-            'margin':'5px 0',
-            // 'display': 'none'
+            'margin':'5px 0'
         })
         const poperClassName = this.poperStyle().className
         this.containerVnode = h('div')
@@ -75,32 +75,48 @@ export default class Poper {
     }
 
     public show(){
+        if ( this.stateFlag ){
+            return
+        }
+        this._getTarget()
         const newPoperVnode = cloneDeep(this.poperVnode)
+        const { top,left } = this.targetRect
         Object.assign(newPoperVnode,{
             data:{
                 ...newPoperVnode.data,
                 style:{
-                    display:'block',
-                    'visibility':'visible'
+                    'display':'block',
+                    'visibility':'visible',
+                    'left': `${left}px`,
+                    'top':`${top+20}px`
                 }
             }
         })
         patch(this.poperVnode,newPoperVnode)
         this.poperVnode = newPoperVnode
+        this.stateFlag = true
     }
     public hide(){
+        if ( !this.stateFlag ){
+            return
+        }
+        this._getTarget()
         const newPoperVnode = cloneDeep(this.poperVnode)
+        const { top,left } = this.targetRect
         Object.assign(newPoperVnode,{
             data:{
                 ...newPoperVnode.data,
                 style:{
                     'display':'none',
-                    'visibility':'hidden'
+                    'visibility':'hidden',
+                    'left': `${left}px`,
+                    'top':`${top+20}px`
                 }
             }
         })
         patch(this.poperVnode,newPoperVnode)
         this.poperVnode = newPoperVnode
+        this.stateFlag = false
     }
     public resetList(datas){
         this.virtualList.resetList(datas)
@@ -111,6 +127,7 @@ export default class Poper {
         this._getTarget()
         const {top,height,left,width} = this.targetRect
         this.poperVnode.elm.style.top = `${top+height}px`
+        this.poperVnode.elm.style.left = `${left}px`
     }
 
     private createNoData(){

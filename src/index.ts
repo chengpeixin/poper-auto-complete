@@ -73,6 +73,7 @@ export default class AutoComplete {
                 label,
                 index:Number(index)
             })
+            this.visible = true
             this.menuVisibleOnFocus = true
             this.fitlerShouldShowItemNode()
             const tagVnode = this.createTags()
@@ -81,8 +82,7 @@ export default class AutoComplete {
             this.poper.resetList(this.finalDatas)
             this.resetInputHeight()
             this.poper.resetPosition()
-            this.selectInputVnode.elm.focus()
-            setTimeout(this.setSoftFocus.bind(this),50)
+            this.setSoftFocus()
         })
     }
     private setupFinalDatas (finalDatas:Option[]) {
@@ -119,6 +119,7 @@ export default class AutoComplete {
         patch(this.targetSeat,this.autoCompleteContainer)
         this.target.innerHTML = ''
         clickoutside(this.autoCompleteContainer.elm as HTMLElement,()=>{
+            this.poper.hide()
             this.selectInputVnode.elm.value = ''
             this.menuVisibleOnFocus = false
             this.visible = false
@@ -126,12 +127,11 @@ export default class AutoComplete {
             this.fitlerShouldShowItemNode()
             this.poper.resetList(this.finalDatas)
             this.selectInputVnode.elm.blur()
-            this.poper.hide()
         })
         this.target.appendChild(this.targetSeat)
     }
     private initPoper(){
-        this.poper = new Poper(this.inputInnerVnode.elm as HTMLDivElement,testData)
+        this.poper = new Poper(this.selectInputVnode.elm as HTMLDivElement,testData)
     }
     
     // 创建tags
@@ -247,7 +247,9 @@ export default class AutoComplete {
                 'focus':()=>{
                     this.handlerFocus()
                     this.menuVisibleOnFocus = true
-                    this.poper.show()
+                    if ( this.visible ){
+                        this.poper.show()
+                    }
                 },
                 'input':(e)=>{
                     if  (this.onIndirectInput){
