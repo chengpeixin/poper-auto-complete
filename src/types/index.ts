@@ -7,6 +7,6 @@ export type Option =  {
 
 export type Opts = {
     options:Option[]
-    width:number
+    width:string
     height:number
 }

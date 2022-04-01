@@ -15,6 +15,7 @@ for(let i=0;i<10;i++){
         value: String(i)
     })
 }
+const publicEvent = "@@public"
 const patch  = init([
     classModule,
     propsModule,
@@ -76,6 +77,7 @@ export default class AutoComplete {
             this.poper.resetPosition()
             // 重置focus事件
             this.setSoftFocus()
+            eventBus.emit(`${publicEvent}-change`,this.selectd)
         })
     }
 
@@ -99,7 +101,7 @@ export default class AutoComplete {
                 'auto-complete':true
             },
             style:{
-                'width': `${this.opts.width}px`,
+                'width': this.opts.width,
                 'display':'inline-block',
                 'position':'relative'
             },
@@ -132,7 +134,7 @@ export default class AutoComplete {
         this.target.appendChild(this.targetSeat)
     }
     private initPoper(){
-        this.poper = new Poper(this.selectInputVnode.elm as HTMLDivElement,this.options)
+        this.poper = new Poper(this.selectInputVnode.elm as HTMLDivElement,this.finalDatas)
     }
     
     // 创建tags
@@ -265,7 +267,7 @@ export default class AutoComplete {
             style:{
                 'display':'flex',
                 'width':'100%',
-                'max-width':`${this.opts.width}px`,
+                'max-width': this.opts.width,
                 'position':'absolute',
                 'line-height': 'normal',
                 'white-space': 'normal',
@@ -404,14 +406,6 @@ export default class AutoComplete {
         if ( !this.visible ){
             (this.selectInputVnode.elm as HTMLInputElement).focus()
         }
-        // if ( this.menuVisibleOnFocus ) {
-        //     this.menuVisibleOnFocus = false
-        // } else {
-        //     this.visible = !this.visible
-        // }
-        // if ( this.visible ){
-        //     (this.selectInputVnode.elm as HTMLInputElement).focus()
-        // }
     }
 
     // 从tags中删除
@@ -431,6 +425,7 @@ export default class AutoComplete {
             this.poper.resetList(this.finalDatas)
             this.resetInputHeight()
             this.poper.resetPosition()
+            eventBus.emit(`${publicEvent}-change`,this.selectd)
         }
     }
     
@@ -451,6 +446,11 @@ export default class AutoComplete {
     // 获取当前输入框内容
     private getFitlerValue (){
         return trim((this.selectInputVnode.elm as HTMLInputElement).value)
+    }
+
+    // 供外部调用
+    public on(eventName:string,cb:Function){
+        eventBus.on(`${publicEvent}-${eventName}`,cb)
     }
 }
 

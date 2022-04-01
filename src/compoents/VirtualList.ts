@@ -55,9 +55,9 @@ export default class VirtualList {
         this.end = this.start + Math.ceil(this.screenHeight / this.itemSize)
         const visibleDatas = this.visibleData()
         this.containerCss = css({
-            height: '100%',
-            overflow: 'auto',
-            position: 'relative',
+            'height': '100%',
+            'overflow': 'auto',
+            'position': 'relative',
             '-webkit-overflow-scrolling': 'touch'
         })
 
@@ -157,7 +157,7 @@ export default class VirtualList {
         // 在这里pathch整个渲染列表
         const currentVisibleDatas = this.visibleData();
         // 为避免在scroll事件中频繁创建dom开销，虚拟列表项全部使用vnode
-        const currentItemsVnode = currentVisibleDatas.map((item:Option,index)=>{
+        const currentItemsVnode = currentVisibleDatas.map((item:Option)=>{
             return h('div',{
                 class:{
                     [infiniteListItemClassName]: true
