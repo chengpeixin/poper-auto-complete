@@ -24,15 +24,15 @@ export default class Poper {
     width=200
     constructor(target:HTMLDivElement,datas,opts={}){
         this.target = target
-        this._getTarget()
-        this._initDom()
-        this._mount()
+        this.getTarget()
+        this.initVnode()
+        this.mount()
         this.virtualList = new VirtualList(datas,this.containerVnode)
     }
-    private _getTarget(){
+    private getTarget(){
         this.targetRect = this.target.getBoundingClientRect()
     }
-    private _initDom (){
+    private initVnode (){
         const {top,height,left} = this.targetRect
         this.poperStyle = css({
             'display': 'block',
@@ -60,13 +60,10 @@ export default class Poper {
             class:{
                 [poperClassName]:true,
                 'poper':true
-            },
-            style:{
-                // "display":'none'
             }
         },[this.containerVnode])
     }
-    private _mount(){
+    private mount(){
         const fullContainerDom = document.createElement('div')
         patch(fullContainerDom,this.poperVnode)
         document.body.appendChild(fullContainerDom)
@@ -90,7 +87,6 @@ export default class Poper {
                 }
             }
         })
-        console.log(newPoperVnode)
         patch(this.poperVnode,newPoperVnode)
         this.poperVnode = newPoperVnode
         this.stateFlag = true
@@ -146,7 +142,7 @@ export default class Poper {
 
     // 获取当前应该的x位置
     private getXPosition(){
-        this._getTarget()
+        this.getTarget()
         const {left} = this.targetRect
         const visibleAareaX = window.innerWidth
         const leftXPosition = this.width + left

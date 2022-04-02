@@ -1,5 +1,145 @@
 @import "./public/reset.less";
-.auto-complete{
-    display: inline-block;
+
+html,body{
+    width: 100vw;
+    height: 100vh;
+    box-sizing: border-box;
+    /* 解决ios滑动卡顿 */
+    -webkit-overflow-scrolling: touch;
+    /* 开启gpu加速 */
+    transform: translateZ(0);
+}
+body{
+    overflow-y: overlay;
+}
+.scroll{
+    display: grid;
+    /* grid-gap: 5px; */
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+.result-item-fullbox{
+    margin: 4px;
+    box-sizing: border-box;
+    transition: all .3s;
+    cursor: pointer;
+}
+.result-item:hover{
+    background-color: #f5f8fa;
+}
+.result-item{
+    width: 98%;
+    height: 130px;
+    flex: 1;
+    border-radius: 5px;
+    max-width: 400px;
+    margin: 0 auto;
+    display: flex;
+    padding: 8px 16px;
+    box-sizing: border-box;
     position: relative;
+    justify-content: space-between;
+    box-shadow: 0 2px 12px 0 rgb(0 0 0 / 10%);
+    transition: all .3s;
+}
+.result-item-img{
+    height: 90px;
+    width: 90px;
+}
+.result-item-img img{
+    width: 90px;
+    height: 90px;
+    border-radius: 5px;
+    opacity:0;
+    transition: opacity 1s ease; 
+}
+.result-item-content{
+    width: 70%;
+    color: #333;
+}
+.result-item-content-title{
+    color: #36517a;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 2px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+.result-item-content-text{
+    display:block;
+    font-size: 16px;
+    text-overflow:ellipsis;
+    padding-right: 8px;
+    box-sizing: border-box;
+    overflow: hidden;
+    display:-webkit-box;
+    -webkit-line-clamp:3;
+    -webkit-box-orient:vertical;
+}
+.result-item-date{
+    position: absolute;
+    bottom: 12px;
+    font-size: 14px;
+    color: #999;
+}
+.next-page{
+    width: 100%;
+    height: 50px;
+    cursor: pointer;
+    color: #93969a;
+    background: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.next-page-text{
+    display: none;
+}
+.spinner {
+  width: 40px;
+  height: 40px;
+  animation: rotate 2s linear infinite;
+  display: block;
+}
+.spinner .path {
+  stroke: #93bfec;
+  stroke-linecap: round;
+  animation: dash 1.5s ease-in-out infinite;
+}
+@keyframes rotate {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes dash {
+  0% {
+    stroke-dasharray: 1, 150;
+    stroke-dashoffset: 0;
+  }
+
+  50% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -35;
+  }
+
+  100% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -124;
+  }
+}
+.skeleton{
+    /* 骨架 */
+    background-image: linear-gradient(90deg, #efecee 25%, #fff 37%, #efecee 63%);
+    background-size: 400% 100%;
+    background-position: 100% 50%;
+    animation: skeleton-loading 1.4s ease infinite;
+}
+@keyframes skeleton-loading {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0 50%;
+  }
 }
