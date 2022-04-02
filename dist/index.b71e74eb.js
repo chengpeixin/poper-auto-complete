@@ -572,13 +572,16 @@ window.addEventListener('load', function() {
         });
     }
     window.addEventListener("scroll", throttle(lazyload, 100));
+    var isLoading = false;
     document.querySelector('.next-page').addEventListener('click', function() {
+        if (isLoading) return;
         hideNextText();
         showLoading();
         loadNewsData();
     });
     // 加载新闻列表
     function loadNewsData() {
+        isLoading = true;
         Object.assign(paging, {
             current: paging.current + 1,
             pageSize: 10,
@@ -601,6 +604,7 @@ window.addEventListener('load', function() {
             }
             hideLoading();
             showNextText();
+            isLoading = false;
             console.log(`当前第${paging.current}页数,共${paging.total}条数据`);
         }, 1500);
     }
