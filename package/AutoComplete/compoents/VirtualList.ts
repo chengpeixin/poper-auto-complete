@@ -44,10 +44,10 @@ export default class VirtualList {
         this.datas = datas
         this.target = target
         this.isInit = true
-        this.initDom()
+        this.initVnode()
     }
 
-    initDom(){
+    initVnode(){
         this.listHeight = this.datas.length * this.itemSize
         this.screenHeight = this.target.elm.parentElement.clientHeight||300;
         // 需要初始化滚动所需
@@ -202,6 +202,6 @@ export default class VirtualList {
     public resetList(datas){
         // 重置datas
         this.datas = datas
-        this.initDom()
+        this.initVnode()
     }
 }
