@@ -2,32 +2,34 @@
 module.exports = function (config) {
     config.set({
 
-        // base path that will be used to resolve all patterns (eg. files, exclude)
-        basePath: '',
-           // frameworks to use
-           // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-           frameworks: ['mocha', 'sinon-chai'],
+           frameworks: ['mocha','sinon-chai','karma-typescript'],
            client: {
                chai: {
                    includeStack: true
                }
            },
-
-
-           // list of files / patterns to load in the browser
            files: [
-               'dist/**/*.test.js',
-               'dist/**/*.test.css'
+               './unit/**/*.spec.ts'
            ],
-
-
-           // list of files / patterns to exclude
            exclude: [],
-
-
-           // preprocess matching files before serving them to the browser
-           // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
-           preprocessors: {},
+           preprocessors: {
+               './unit/**/*.spec.ts':['babel'],
+               "**/*.ts": "karma-typescript"
+           },
+           typescriptPreprocessor:{
+            options:{
+                sourceMap: false,
+                target: 'ES5',
+                module: 'amd',
+                noImplicitAny: true,
+                noResolve: true,
+                removeComments: true,
+                concatenateOutput: false
+            },
+            transformPath: function(path) {
+                return path.replace(/\.ts$/, '.js');
+              }
+           },
 
 
            // test results reporter to use
@@ -47,23 +49,9 @@ module.exports = function (config) {
            // level of logging
            // possible values: config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
            logLevel: config.LOG_INFO,
-
-
-           // enable / disable watching file and executing tests whenever any file changes
            autoWatch: true,
-
-
-           // start these browsers
-           // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
            browsers: ['ChromeHeadless'],
-
-
-           // Continuous Integration mode
-           // if true, Karma captures browsers, runs the tests and exits
            singleRun: false,
-
-           // Concurrency level
-           // how many browser should be started simultaneous
            concurrency: Infinity
        })
    }
