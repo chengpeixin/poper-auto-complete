@@ -1,3 +1,4 @@
+// @ts-ignore
 import { css } from '@stitches/core';
 import { CssComponent } from '@stitches/core/types/styled-component';
 import VirtualList from './VirtualList';
@@ -66,7 +67,10 @@ export default class Poper {
     private mount(){
         const fullContainerDom = document.createElement('div')
         patch(fullContainerDom,this.poperVnode)
-        document.body.appendChild(fullContainerDom)
+        // BUG: 极端情况下未patch完则进行append
+        setTimeout(()=>{
+            document.body.appendChild(this.poperVnode.elm)
+        },50)
     }
 
     public show(){
@@ -122,8 +126,9 @@ export default class Poper {
     public resetPosition(){
         const x = this.getXPosition()
         const {top,height} = this.targetRect
-        this.poperVnode.elm.style.top = `${top+height}px`
-        this.poperVnode.elm.style.left = `${x}px`
+        const poperVnodeElm = this.poperVnode.elm as HTMLDivElement
+        poperVnodeElm.style.top = `${top+height}px`
+        poperVnodeElm.style.left = `${x}px`
     }
 
     private createNoData(){
