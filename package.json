@@ -6,7 +6,7 @@
   "browserslist": "> 0.5%, last 2 versions, not dead",
   "scripts": {
     "dev": "parcel index.html",
-    "test1": "npx parcel build index.html --no-cache",
+    "test": "jest",
     "test2": "npx run start test/karma.conf.js --single-run",
     "build": "parcel build index.html"
   },
@@ -33,7 +33,13 @@
   "dependencies": {
     "@faker-js/faker": "^6.1.1",
     "@stitches/core": "^1.2.7",
+    "@types/jest": "^27.4.1",
+    "babel-jest": "^27.5.1",
+    "jest": "^27.5.1",
+    "jest-watch-typeahead": "^1.0.0",
+    "jquery": "^3.6.0",
     "lodash": "^4.17.21",
-    "snabbdom": "^3.4.0"
+    "snabbdom": "^3.4.0",
+    "ts-jest": "^27.1.4"
   }
 }

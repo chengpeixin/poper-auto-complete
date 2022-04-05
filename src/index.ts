@@ -1,5 +1,6 @@
-import AutoComplete from '/package/AutoComplete'
-import "./less/index.less"
+// @ts-nocheck
+import AutoComplete from './../package/AutoComplete'
+
 const testData = []
 for(let i=0;i<100000;i++){
     testData.push({
@@ -8,7 +9,10 @@ for(let i=0;i<100000;i++){
     })
 }
 
-window.addEventListener('load',function(){
+window.addEventListener('load',init)
+
+
+export function init(){
     const autoComplete = new AutoComplete(document.querySelector('#xxx'),{
         options:testData,
         width:'100%',
@@ -165,7 +169,7 @@ window.addEventListener('load',function(){
         imgTarget.style.opacity = '1'
     }
 
-    // 提出图片加载骨架图加载特效
+    // 剔除图片加载骨架图加载特效
     function removeSkeleton(target){
         target.classList.remove('skeleton')        
     }
@@ -270,15 +274,15 @@ window.addEventListener('load',function(){
     }
 
     function showLoading (){
-        document.querySelector('.spinner').style.display = 'block'
+        (document.querySelector('.spinner') as HTMLDivElement).style.display = 'block'
     }
     function hideLoading (){
-        document.querySelector('.spinner').style.display = 'none'
+        (document.querySelector('.spinner') as HTMLDivElement).style.display = 'none'
     }
     function showNextText(){
-        document.querySelector('.next-page-text').style.display = 'block'
+        (document.querySelector('.next-page-text') as HTMLDivElement).style.display = 'block'
     }
     function hideNextText(){
-        document.querySelector('.next-page-text').style.display = 'none'
+        (document.querySelector('.next-page-text') as HTMLDivElement).style.display = 'none'
     }
-})
+}

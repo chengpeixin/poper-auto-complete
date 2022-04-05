@@ -1,12 +1,12 @@
 // import './less/index.less'
+// @ts-ignore
+import { css as css } from '@stitches/core'
 import Poper from './compoents/Poper'
 import { attributesModule, classModule, eventListenersModule, h, init, propsModule, styleModule, VNode } from 'snabbdom'
 import { isChrome } from './util/is'
-import { trim } from 'lodash'
+import { trim,cloneDeep } from 'lodash'
 import { Option, Opts } from './types'
 import eventBus from './util/EventBus'
-import { css } from '@stitches/core'
-import { cloneDeep } from 'lodash'
 import clickoutside from './util/clickoutside'
 
 const publicEvent = "@@public"
@@ -110,16 +110,17 @@ export default class AutoComplete {
         this.target.innerHTML = ''
         clickoutside(this.autoCompleteContainer.elm as HTMLElement,()=>{
             setTimeout(()=>{
+                const selectInputDom = this.selectInputVnode.elm as HTMLInputElement
                 // 判断是否点击的是父级元素
                 if ( !this.isClickLabel ){
                     this.poper.hide()
-                    this.selectInputVnode.elm.value = ''
+                    selectInputDom.value = ''
                     this.menuVisibleOnFocus = false
                     this.visible = false
                     this.resetShouldItemByfitlerValue()
                     this.fitlerShouldShowItemNode()
                     this.poper.resetList(this.finalDatas)
-                    this.selectInputVnode.elm.blur()
+                    selectInputDom.blur()
                 } else {
                     this.isClickLabel = false
                 }
@@ -362,7 +363,7 @@ export default class AutoComplete {
 
     // 根据当前fltler输入值过滤
     private resetShouldItemByfitlerValue(){
-        const value = trim(this.selectInputVnode.elm && this.selectInputVnode.elm.value || '')
+        const value = trim(this.selectInputVnode.elm && (this.selectInputVnode.elm as HTMLInputElement).value || '')
         var reg = new RegExp(value);
         if (value === ''){
             this.finalDatas = this.options
@@ -391,7 +392,7 @@ export default class AutoComplete {
 
     private setSoftFocus(){
         // this.softFocus = true
-        this.selectInputVnode.elm && this.selectInputVnode.elm.focus()
+        this.selectInputVnode.elm && (this.selectInputVnode.elm as HTMLInputElement).focus()
     }
 
     // 点击选择框控件
@@ -426,7 +427,7 @@ export default class AutoComplete {
 
     // 重置选择器框高度
     private resetInputHeight(){
-        const tagsHeight = Math.round(this.autoCompleteTags.elm.getBoundingClientRect().height)
+        const tagsHeight = Math.round((this.autoCompleteTags.elm as HTMLElement).getBoundingClientRect().height)
         const initialInputHeight = 40
         let inputHeight = initialInputHeight
         if (this.selectd.length !== 0){
@@ -434,7 +435,7 @@ export default class AutoComplete {
                 tagsHeight > initialInputHeight? tagsHeight + (tagsHeight>initialInputHeight? 6 : 0): initialInputHeight
             )
         }
-        this.inputInnerVnode.elm.style.height = `${inputHeight}px`
+        (this.inputInnerVnode.elm as HTMLInputElement).style.height = `${inputHeight}px`
     }
 
     // 获取当前输入框内容

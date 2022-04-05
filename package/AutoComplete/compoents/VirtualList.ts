@@ -6,6 +6,7 @@ import { h,init,
     attributesModule,
     VNode
 } from 'snabbdom'
+// @ts-ignore
 import { css } from '@stitches/core';
 import { CssComponent } from '@stitches/core/types/styled-component';
 import eventBus from '../util/EventBus';

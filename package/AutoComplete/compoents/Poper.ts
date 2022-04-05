@@ -59,8 +59,7 @@ export default class Poper {
         this.containerVnode = h('div')
         this.poperVnode = h('div',{
             class:{
-                [poperClassName]:true,
-                'poper':true
+                [poperClassName]:true
             }
         },[this.containerVnode])
     }

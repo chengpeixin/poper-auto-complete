@@ -515,15 +515,19 @@ function hmrAcceptRun(bundle, id) {
 
 },{}],"h7u1C":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-var _autoComplete = require("/package/AutoComplete");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "init", ()=>init
+);
+// @ts-nocheck
+var _autoComplete = require("./../package/AutoComplete");
 var _autoCompleteDefault = parcelHelpers.interopDefault(_autoComplete);
-var _indexLess = require("./less/index.less");
 const testData = [];
 for(let i = 0; i < 100000; i++)testData.push({
     label: `${i}hcdfj`,
     value: String(i)
 });
-window.addEventListener('load', function() {
+window.addEventListener('load', init);
+function init() {
     const autoComplete = new _autoCompleteDefault.default(document.querySelector('#xxx'), {
         options: testData,
         width: '100%',
@@ -659,7 +663,7 @@ window.addEventListener('load', function() {
         // 设置动画
         imgTarget.style.opacity = '1';
     }
-    // 提出图片加载骨架图加载特效
+    // 剔除图片加载骨架图加载特效
     function removeSkeleton(target) {
         target.classList.remove('skeleton');
     }
@@ -770,42 +774,14 @@ window.addEventListener('load', function() {
     function hideNextText() {
         document.querySelector('.next-page-text').style.display = 'none';
     }
-});
+}
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","/package/AutoComplete":"1Fe2D","./less/index.less":"8GisH"}],"gkKU3":[function(require,module,exports) {
-exports.interopDefault = function(a) {
-    return a && a.__esModule ? a : {
-        default: a
-    };
-};
-exports.defineInteropFlag = function(a) {
-    Object.defineProperty(a, '__esModule', {
-        value: true
-    });
-};
-exports.exportAll = function(source, dest) {
-    Object.keys(source).forEach(function(key) {
-        if (key === 'default' || key === '__esModule' || dest.hasOwnProperty(key)) return;
-        Object.defineProperty(dest, key, {
-            enumerable: true,
-            get: function() {
-                return source[key];
-            }
-        });
-    });
-    return dest;
-};
-exports.export = function(dest, destName, get) {
-    Object.defineProperty(dest, destName, {
-        enumerable: true,
-        get: get
-    });
-};
-
-},{}],"1Fe2D":[function(require,module,exports) {
+},{"./../package/AutoComplete":"1Fe2D","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"1Fe2D":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 // import './less/index.less'
+// @ts-ignore
+var _core = require("@stitches/core");
 var _poper = require("./compoents/Poper");
 var _poperDefault = parcelHelpers.interopDefault(_poper);
 var _snabbdom = require("snabbdom");
@@ -813,7 +789,6 @@ var _is = require("./util/is");
 var _lodash = require("lodash");
 var _eventBus = require("./util/EventBus");
 var _eventBusDefault = parcelHelpers.interopDefault(_eventBus);
-var _core = require("@stitches/core");
 var _clickoutside = require("./util/clickoutside");
 var _clickoutsideDefault = parcelHelpers.interopDefault(_clickoutside);
 const publicEvent = "@@public";
@@ -907,16 +882,17 @@ class AutoComplete {
         this.target.innerHTML = '';
         _clickoutsideDefault.default(this.autoCompleteContainer.elm, ()=>{
             setTimeout(()=>{
+                const selectInputDom = this.selectInputVnode.elm;
                 // 判断是否点击的是父级元素
                 if (!this.isClickLabel) {
                     this.poper.hide();
-                    this.selectInputVnode.elm.value = '';
+                    selectInputDom.value = '';
                     this.menuVisibleOnFocus = false;
                     this.visible = false;
                     this.resetShouldItemByfitlerValue();
                     this.fitlerShouldShowItemNode();
                     this.poper.resetList(this.finalDatas);
-                    this.selectInputVnode.elm.blur();
+                    selectInputDom.blur();
                 } else this.isClickLabel = false;
             }, 50);
         });
@@ -1213,148 +1189,7 @@ class AutoComplete {
 }
 exports.default = AutoComplete;
 
-},{"./compoents/Poper":"4Wbw4","snabbdom":"Rkydo","./util/is":"99gYp","lodash":"3qBDj","./util/EventBus":"7chAt","@stitches/core":"74hel","./util/clickoutside":"9xfJk","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"4Wbw4":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-var _core = require("@stitches/core");
-var _virtualList = require("./VirtualList");
-var _virtualListDefault = parcelHelpers.interopDefault(_virtualList);
-var _lodash = require("lodash");
-var _snabbdom = require("snabbdom");
-const patch = _snabbdom.init([
-    _snabbdom.classModule,
-    _snabbdom.propsModule,
-    _snabbdom.styleModule,
-    _snabbdom.eventListenersModule,
-    _snabbdom.attributesModule
-]);
-class Poper {
-    stateFlag = false;
-    width = 200;
-    constructor(target, datas, opts = {}){
-        this.target = target;
-        this.getTarget();
-        this.initVnode();
-        this.mount();
-        this.virtualList = new _virtualListDefault.default(datas, this.containerVnode);
-    }
-    getTarget() {
-        this.targetRect = this.target.getBoundingClientRect();
-    }
-    initVnode() {
-        const { top , height , left  } = this.targetRect;
-        this.poperStyle = _core.css({
-            'display': 'block',
-            'visibility': 'hidden',
-            'position': 'absolute',
-            'width': `${this.width}px`,
-            'height': `200px`,
-            'transform-origin': 'center top',
-            'z-index': '100',
-            'top': `${top + height}px`,
-            'left': `${left}px`,
-            'box-sizing': 'border-box',
-            'min-height': '0px',
-            'max-height': '400px',
-            'border': '1px solid #e4e7ed',
-            'border-radius': '4px',
-            'background-color': '#fff',
-            'box-shadow': '0 2px 12px 0 rgb(0 0 0 / 10%)',
-            'margin': '5px 0',
-            'transition': 'all .3s'
-        });
-        const poperClassName = this.poperStyle().className;
-        this.containerVnode = _snabbdom.h('div');
-        this.poperVnode = _snabbdom.h('div', {
-            class: {
-                [poperClassName]: true,
-                'poper': true
-            }
-        }, [
-            this.containerVnode
-        ]);
-    }
-    mount() {
-        const fullContainerDom = document.createElement('div');
-        patch(fullContainerDom, this.poperVnode);
-        document.body.appendChild(fullContainerDom);
-    }
-    show() {
-        if (this.stateFlag) return;
-        const x = this.getXPosition();
-        const newPoperVnode = _lodash.cloneDeep(this.poperVnode);
-        const { top  } = this.targetRect;
-        Object.assign(newPoperVnode, {
-            data: {
-                ...newPoperVnode.data,
-                style: {
-                    'display': 'block',
-                    'visibility': 'visible',
-                    'left': `${x}px`,
-                    'top': `${top + 20}px`
-                }
-            }
-        });
-        patch(this.poperVnode, newPoperVnode);
-        this.poperVnode = newPoperVnode;
-        this.stateFlag = true;
-    }
-    hide() {
-        if (!this.stateFlag) return;
-        const x = this.getXPosition();
-        const newPoperVnode = _lodash.cloneDeep(this.poperVnode);
-        const { top  } = this.targetRect;
-        Object.assign(newPoperVnode, {
-            data: {
-                ...newPoperVnode.data,
-                style: {
-                    'display': 'none',
-                    'visibility': 'hidden',
-                    'left': `${x}px`,
-                    'top': `${top + 20}px`
-                }
-            }
-        });
-        console.log(newPoperVnode);
-        patch(this.poperVnode, newPoperVnode);
-        this.poperVnode = newPoperVnode;
-        this.stateFlag = false;
-    }
-    resetList(datas) {
-        this.virtualList.resetList(datas);
-    }
-    // 重置poper位置
-    resetPosition() {
-        const x = this.getXPosition();
-        const { top , height  } = this.targetRect;
-        this.poperVnode.elm.style.top = `${top + height}px`;
-        this.poperVnode.elm.style.left = `${x}px`;
-    }
-    createNoData() {
-        const noDataSeatStyle = _core.css({
-            'color': '#999',
-            'font-size': '14px',
-            'text-align': 'center'
-        });
-        const noDataSeatClassName = noDataSeatStyle.className;
-        return _snabbdom.h('div', {
-            class: {
-                [noDataSeatClassName]: true
-            }
-        }, '无数据');
-    }
-    // 获取当前应该的x位置
-    getXPosition() {
-        this.getTarget();
-        const { left  } = this.targetRect;
-        const visibleAareaX = window.innerWidth;
-        const leftXPosition = this.width + left;
-        return leftXPosition > visibleAareaX ? visibleAareaX - this.width : left;
-    }
-}
-exports.default = Poper;
-
-},{"@stitches/core":"74hel","./VirtualList":"2eToD","lodash":"3qBDj","snabbdom":"Rkydo","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"74hel":[function(require,module,exports) {
+},{"@stitches/core":"74hel","./compoents/Poper":"4Wbw4","snabbdom":"Rkydo","./util/is":"99gYp","lodash":"3qBDj","./util/EventBus":"7chAt","./util/clickoutside":"9xfJk","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"74hel":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "createStitches", ()=>X
@@ -2265,10 +2100,186 @@ var e, t = "colors", n = "sizes", r = "space", i = {
 , _ = (...e94)=>Y().css(...e94)
 ;
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"2eToD":[function(require,module,exports) {
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"gkKU3":[function(require,module,exports) {
+exports.interopDefault = function(a) {
+    return a && a.__esModule ? a : {
+        default: a
+    };
+};
+exports.defineInteropFlag = function(a) {
+    Object.defineProperty(a, '__esModule', {
+        value: true
+    });
+};
+exports.exportAll = function(source, dest) {
+    Object.keys(source).forEach(function(key) {
+        if (key === 'default' || key === '__esModule' || dest.hasOwnProperty(key)) return;
+        Object.defineProperty(dest, key, {
+            enumerable: true,
+            get: function() {
+                return source[key];
+            }
+        });
+    });
+    return dest;
+};
+exports.export = function(dest, destName, get) {
+    Object.defineProperty(dest, destName, {
+        enumerable: true,
+        get: get
+    });
+};
+
+},{}],"4Wbw4":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+// @ts-ignore
+var _core = require("@stitches/core");
+var _virtualList = require("./VirtualList");
+var _virtualListDefault = parcelHelpers.interopDefault(_virtualList);
+var _lodash = require("lodash");
+var _snabbdom = require("snabbdom");
+const patch = _snabbdom.init([
+    _snabbdom.classModule,
+    _snabbdom.propsModule,
+    _snabbdom.styleModule,
+    _snabbdom.eventListenersModule,
+    _snabbdom.attributesModule
+]);
+class Poper {
+    stateFlag = false;
+    width = 200;
+    constructor(target, datas, opts = {}){
+        this.target = target;
+        this.getTarget();
+        this.initVnode();
+        this.mount();
+        this.virtualList = new _virtualListDefault.default(datas, this.containerVnode);
+    }
+    getTarget() {
+        this.targetRect = this.target.getBoundingClientRect();
+    }
+    initVnode() {
+        const { top , height , left  } = this.targetRect;
+        this.poperStyle = _core.css({
+            'display': 'block',
+            'visibility': 'hidden',
+            'position': 'absolute',
+            'width': `${this.width}px`,
+            'height': `200px`,
+            'transform-origin': 'center top',
+            'z-index': '100',
+            'top': `${top + height}px`,
+            'left': `${left}px`,
+            'box-sizing': 'border-box',
+            'min-height': '0px',
+            'max-height': '400px',
+            'border': '1px solid #e4e7ed',
+            'border-radius': '4px',
+            'background-color': '#fff',
+            'box-shadow': '0 2px 12px 0 rgb(0 0 0 / 10%)',
+            'margin': '5px 0',
+            'transition': 'all .3s'
+        });
+        const poperClassName = this.poperStyle().className;
+        this.containerVnode = _snabbdom.h('div');
+        this.poperVnode = _snabbdom.h('div', {
+            class: {
+                [poperClassName]: true
+            }
+        }, [
+            this.containerVnode
+        ]);
+    }
+    mount() {
+        const fullContainerDom = document.createElement('div');
+        patch(fullContainerDom, this.poperVnode);
+        // BUG: 极端情况下未patch完则进行append
+        setTimeout(()=>{
+            document.body.appendChild(this.poperVnode.elm);
+        }, 50);
+    }
+    show() {
+        if (this.stateFlag) return;
+        const x = this.getXPosition();
+        const newPoperVnode = _lodash.cloneDeep(this.poperVnode);
+        const { top  } = this.targetRect;
+        Object.assign(newPoperVnode, {
+            data: {
+                ...newPoperVnode.data,
+                style: {
+                    'display': 'block',
+                    'visibility': 'visible',
+                    'left': `${x}px`,
+                    'top': `${top + 20}px`
+                }
+            }
+        });
+        patch(this.poperVnode, newPoperVnode);
+        this.poperVnode = newPoperVnode;
+        this.stateFlag = true;
+    }
+    hide() {
+        if (!this.stateFlag) return;
+        const x = this.getXPosition();
+        const newPoperVnode = _lodash.cloneDeep(this.poperVnode);
+        const { top  } = this.targetRect;
+        Object.assign(newPoperVnode, {
+            data: {
+                ...newPoperVnode.data,
+                style: {
+                    'display': 'none',
+                    'visibility': 'hidden',
+                    'left': `${x}px`,
+                    'top': `${top + 20}px`
+                }
+            }
+        });
+        console.log(newPoperVnode);
+        patch(this.poperVnode, newPoperVnode);
+        this.poperVnode = newPoperVnode;
+        this.stateFlag = false;
+    }
+    resetList(datas) {
+        this.virtualList.resetList(datas);
+    }
+    // 重置poper位置
+    resetPosition() {
+        const x = this.getXPosition();
+        const { top , height  } = this.targetRect;
+        const poperVnodeElm = this.poperVnode.elm;
+        poperVnodeElm.style.top = `${top + height}px`;
+        poperVnodeElm.style.left = `${x}px`;
+    }
+    createNoData() {
+        const noDataSeatStyle = _core.css({
+            'color': '#999',
+            'font-size': '14px',
+            'text-align': 'center'
+        });
+        const noDataSeatClassName = noDataSeatStyle.className;
+        return _snabbdom.h('div', {
+            class: {
+                [noDataSeatClassName]: true
+            }
+        }, '无数据');
+    }
+    // 获取当前应该的x位置
+    getXPosition() {
+        this.getTarget();
+        const { left  } = this.targetRect;
+        const visibleAareaX = window.innerWidth;
+        const leftXPosition = this.width + left;
+        return leftXPosition > visibleAareaX ? visibleAareaX - this.width : left;
+    }
+}
+exports.default = Poper;
+
+},{"@stitches/core":"74hel","./VirtualList":"2eToD","lodash":"3qBDj","snabbdom":"Rkydo","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"2eToD":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 var _snabbdom = require("snabbdom");
+// @ts-ignore
 var _core = require("@stitches/core");
 var _eventBus = require("../util/EventBus");
 var _eventBusDefault = parcelHelpers.interopDefault(_eventBus);
@@ -17491,6 +17502,6 @@ exports.default = (target, handler)=>{
     });
 };
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"8GisH":[function() {},{}]},["8wcER","h7u1C"], "h7u1C", "parcelRequirecf29")
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}]},["8wcER","h7u1C"], "h7u1C", "parcelRequirecf29")
 
 //# sourceMappingURL=index.b71e74eb.js.map
