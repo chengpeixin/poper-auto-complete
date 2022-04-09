@@ -9,4 +9,6 @@ export type Opts = {
     options:Option[]
     width:string
     height:number
+    // 点击后是否关闭poper，默认不关闭
+    selectionClose:boolean
 }

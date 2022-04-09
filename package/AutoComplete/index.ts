@@ -71,6 +71,12 @@ export default class AutoComplete {
             this.poper.resetPosition()
             // 重置focus事件
             this.setSoftFocus()
+            if ( this.opts.selectionClose ){
+                this.poper.hide()
+                this.visible = false
+                this.menuVisibleOnFocus = false
+                this.isClickLabel = false
+            }
             eventBus.emit(`${publicEvent}-change`,this.selectd.map(el=>{
                 const select =  {
                     ...el

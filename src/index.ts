@@ -17,7 +17,8 @@ export function init(){
     var autoComplete = new AutoComplete(document.querySelector('#xxx'),{
         options:testData,
         width:'100%',
-        height:50
+        height:50,
+        selectionClose: true
     })
 
     var paging = {

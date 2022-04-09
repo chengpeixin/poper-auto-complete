@@ -533,7 +533,8 @@ function init() {
     var autoComplete = new _autoCompleteDefault.default(document.querySelector('#xxx'), {
         options: testData,
         width: '100%',
-        height: 50
+        height: 50,
+        selectionClose: true
     });
     var paging = {
         current: 0,
@@ -859,6 +860,12 @@ class AutoComplete {
             this.poper.resetPosition();
             // 重置focus事件
             this.setSoftFocus();
+            if (this.opts.selectionClose) {
+                this.poper.hide();
+                this.visible = false;
+                this.menuVisibleOnFocus = false;
+                this.isClickLabel = false;
+            }
             _eventBusDefault.default.emit(`${publicEvent}-change`, this.selectd.map((el)=>{
                 const select = {
                     ...el
