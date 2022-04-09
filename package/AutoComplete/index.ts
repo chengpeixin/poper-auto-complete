@@ -71,7 +71,13 @@ export default class AutoComplete {
             this.poper.resetPosition()
             // 重置focus事件
             this.setSoftFocus()
-            eventBus.emit(`${publicEvent}-change`,this.selectd)
+            eventBus.emit(`${publicEvent}-change`,this.selectd.map(el=>{
+                const select =  {
+                    ...el
+                }
+                delete select.index
+                return select
+            }))
         })
     }
 
@@ -217,7 +223,8 @@ export default class AutoComplete {
             'font-size': '14px',
             'appearance': 'none',
             'height': '28px',
-            'background-color': 'transparent'
+            'background-color': 'transparent',
+            // 'height':`${this.opts.height}px`
         })
         const selectInputClassName = selectInputStyle().className
         const selectInputVnode = h('input',{
@@ -303,7 +310,8 @@ export default class AutoComplete {
             'outline': 'none',
             'padding': '0 15px',
             'transition': 'border-color .2s cubic-bezier(.645,.045,.355,1)',
-            'width': '100%'
+            'width': '100%',
+            'min-height': `${this.opts.height}px`
         })
         const inputInnerClassName = inputInnerStyle().className
         const inputSuffixStyle = css({
@@ -314,7 +322,8 @@ export default class AutoComplete {
         })
         const inputInnerVnode = h('input',{
             class:{
-                [inputInnerClassName]:true
+                [inputInnerClassName]:true,
+                'succ':true
             },
             attrs:{
                 readonly: 'readonly',

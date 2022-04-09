@@ -5,6 +5,7 @@
     outline: 0;
 }
 
+
 table {
     border-collapse:collapse;
     border-spacing:0;
@@ -22,7 +23,6 @@ h1, h2, h3, h4, h5, h6 {
 }
 :focus { outline: 0;}
 a{ text-decoration:none;}
-
 html,body{
     width: 100vw;
     height: 100vh;
@@ -35,6 +35,7 @@ html,body{
 body{
     overflow-y: overlay;
 }
+@searchBtnWidth:50px;
 .scroll{
     display: grid;
     /* grid-gap: 5px; */
@@ -129,6 +130,28 @@ body{
   stroke-linecap: round;
   animation: dash 1.5s ease-in-out infinite;
 }
+
+.saerch-full{
+  display: flex;
+  min-height: 50px;
+  .search-input{
+    width: calc(100% - @searchBtnWidth);
+    box-sizing: border-box;
+  }
+  .search-button{
+    display: block;
+    width: @searchBtnWidth;
+    font-size: 18px;
+    min-height: 50px;
+    button{
+      display: block;
+      width: 100%;
+      height: 100%;
+      font-size: 18px;
+    }
+  }
+}
+
 @keyframes rotate {
   100% {
     transform: rotate(360deg);

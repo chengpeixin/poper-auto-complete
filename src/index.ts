@@ -1,6 +1,6 @@
 // @ts-nocheck
 import AutoComplete from './../package/AutoComplete'
-
+import { debounce } from 'lodash'
 const testData = []
 for(let i=0;i<100000;i++){
     testData.push({
@@ -13,7 +13,8 @@ window.addEventListener('load',init)
 
 
 export function init(){
-    const autoComplete = new AutoComplete(document.querySelector('#xxx'),{
+    let selectds = []
+    var autoComplete = new AutoComplete(document.querySelector('#xxx'),{
         options:testData,
         width:'100%',
         height:50
@@ -25,7 +26,13 @@ export function init(){
         total:0
     }
     // autoComplete内置事件
-    autoComplete.on('change', throttle(function (data) {
+    autoComplete.on('change',function (data) {
+        selectds = data
+        setDisabled(selectds===0)
+    })
+
+    // 点击搜索按钮
+    document.querySelector('.search-btn').addEventListener('click',debounce(function(){
         const fullScroll = document.querySelector('.scroll')
         fullScroll.innerHTML = ''
         hideNextText()
@@ -37,7 +44,7 @@ export function init(){
             pageSize:10,
             total:0
         })
-    },500))
+    },300))
 
     loadNewsData()
 
@@ -66,7 +73,7 @@ export function init(){
         })
     }
 
-    window.addEventListener("scroll",throttle(lazyload,100))
+    window.addEventListener("scroll",debounce(lazyload,100))
     var isLoading = false
     document.querySelector('.next-page').addEventListener('click',function(){
         if ( isLoading ){
@@ -108,29 +115,29 @@ export function init(){
     }
     
     // 节流函数
-    function throttle(fn, delay) {
-        let timer
-        let prevTime
-        return function (...args) {
-            const currTime = Date.now()
-            const context = this
-            if (!prevTime){
-                prevTime = currTime
-            }
-            clearTimeout(timer)
-            if (currTime - prevTime > delay) {
-                prevTime = currTime
-                fn.apply(context, args)
-                clearTimeout(timer)
-                return
-            }
-            timer = setTimeout(function () {
-                prevTime = Date.now()
-                timer = null
-                fn.apply(context, args)
-            }, delay)
-        }
-    }
+    // function debounce(fn, delay) {
+    //     let timer
+    //     let prevTime
+    //     return function (...args) {
+    //         const currTime = Date.now()
+    //         const context = this
+    //         if (!prevTime){
+    //             prevTime = currTime
+    //         }
+    //         clearTimeout(timer)
+    //         if (currTime - prevTime > delay) {
+    //             prevTime = currTime
+    //             fn.apply(context, args)
+    //             clearTimeout(timer)
+    //             return
+    //         }
+    //         timer = setTimeout(function () {
+    //             prevTime = Date.now()
+    //             timer = null
+    //             fn.apply(context, args)
+    //         }, delay)
+    //     }
+    // }
     
     // 主动触发图片加载
     function dispatchLazyImg(){
@@ -172,6 +179,16 @@ export function init(){
     // 剔除图片加载骨架图加载特效
     function removeSkeleton(target){
         target.classList.remove('skeleton')        
+    }
+
+    // 设置不可搜索状态
+    function setDisabled(state:boolean){
+        const btn = document.querySelector('.search-btn')
+        if ( state ){
+            btn.setAttribute('disabled','disabled')
+        } else {
+            btn.removeAttribute('disabled')
+        }
     }
 
     // 随机返回图片地址
