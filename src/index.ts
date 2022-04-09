@@ -1,6 +1,7 @@
 // @ts-nocheck
 import AutoComplete from './../package/AutoComplete'
 import { debounce } from 'lodash'
+import { isMac } from './util/is'
 const testData = []
 for(let i=0;i<100000;i++){
     testData.push({
@@ -115,31 +116,6 @@ export function init(){
         },1500)
     }
     
-    // 节流函数
-    // function debounce(fn, delay) {
-    //     let timer
-    //     let prevTime
-    //     return function (...args) {
-    //         const currTime = Date.now()
-    //         const context = this
-    //         if (!prevTime){
-    //             prevTime = currTime
-    //         }
-    //         clearTimeout(timer)
-    //         if (currTime - prevTime > delay) {
-    //             prevTime = currTime
-    //             fn.apply(context, args)
-    //             clearTimeout(timer)
-    //             return
-    //         }
-    //         timer = setTimeout(function () {
-    //             prevTime = Date.now()
-    //             timer = null
-    //             fn.apply(context, args)
-    //         }, delay)
-    //     }
-    // }
-    
     // 主动触发图片加载
     function dispatchLazyImg(){
         var evt = window.document.createEvent('UIEvents');
@@ -155,12 +131,14 @@ export function init(){
         date
     }){
         const placeholder = document.createElement('div')
+        const ismac = isMac()
+        console.log(ismac)
         placeholder.innerHTML = `
         <div class="result-item-fullbox">
             <div class="result-item">
                 <div class="result-item-content">
                     <div class="result-item-content-title">${title}</div>
-                    <div class="result-item-content-text">${text}</div>
+                    <div class="${ismac?'mac-text':''} result-item-content-text">${text}</div>
                 </div>
                 <div class="result-item-img skeleton">
                     <img lazy="true" data-src="${src}">
