@@ -53,7 +53,7 @@ export default class Poper {
             'background-color':'#fff',
             'box-shadow':'0 2px 12px 0 rgb(0 0 0 / 10%)',
             'margin':'5px 0',
-            'transition': 'all .3s'
+            // 'transition': 'all .3s'
         })
         const poperClassName = this.poperStyle().className
         this.containerVnode = h('div')

@@ -2208,8 +2208,7 @@ class Poper {
             'border-radius': '4px',
             'background-color': '#fff',
             'box-shadow': '0 2px 12px 0 rgb(0 0 0 / 10%)',
-            'margin': '5px 0',
-            'transition': 'all .3s'
+            'margin': '5px 0'
         });
         const poperClassName = this.poperStyle().className;
         this.containerVnode = _snabbdom.h('div');
