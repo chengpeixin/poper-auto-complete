@@ -2,21 +2,15 @@
 import AutoComplete from './../package/AutoComplete'
 import { debounce } from 'lodash'
 import { isMac } from './util/is'
-const testData = []
-for(let i=0;i<100000;i++){
-    testData.push({
-        label: `${i}hcdfj`,
-        value: String(i)
-    })
-}
+import selectJSON from './data/select.json'
 
+// https://news.sina.com.cn/china/
 window.addEventListener('load',init)
-
 
 export function init(){
     let selectds = []
     var autoComplete = new AutoComplete(document.querySelector('#xxx'),{
-        options:testData,
+        options:selectJSON,
         width:'100%',
         height:50,
         selectionClose: true
@@ -132,7 +126,6 @@ export function init(){
     }){
         const placeholder = document.createElement('div')
         const ismac = isMac()
-        console.log(ismac)
         placeholder.innerHTML = `
         <div class="result-item-fullbox">
             <div class="result-item">
