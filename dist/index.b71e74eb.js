@@ -2258,7 +2258,6 @@ class Poper {
                 }
             }
         });
-        console.log(newPoperVnode);
         patch(this.poperVnode, newPoperVnode);
         this.poperVnode = newPoperVnode;
         this.stateFlag = false;
