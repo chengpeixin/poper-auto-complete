@@ -3,7 +3,7 @@ import AutoComplete from './../package/AutoComplete'
 import { debounce } from 'lodash'
 import { isMac } from './util/is'
 import selectJSON from './data/select.json'
-
+import allNews from './data/content.json'
 // https://news.sina.com.cn/china/
 window.addEventListener('load',init)
 
@@ -16,31 +16,34 @@ export function init(){
         selectionClose: true
     })
 
+    // state状态，1正常展示分页，2加载中，3无数据
     var paging = {
-        current:0,
+        current:1,
         pageSize:10,
-        total:0
+        state:'1'
     }
+
     // autoComplete内置事件
-    autoComplete.on('change',function (data) {
+    autoComplete.on('change',debounce(function (data) {
         selectds = data
-        setDisabled(selectds===0)
-    })
+        setDisabled(selectds.length===0)
+        searchNewsHandler()
+    },300))
 
     // 点击搜索按钮
-    document.querySelector('.search-btn').addEventListener('click',debounce(function(){
-        const fullScroll = document.querySelector('.scroll')
-        fullScroll.innerHTML = ''
-        hideNextText()
-        showLoading()
-        // 这里是传出的属性
-        loadNewsData()
-        Object.assign(paging,{
-            current:0,
-            pageSize:10,
-            total:0
-        })
-    },300))
+    document.querySelector('.search-btn').addEventListener('click',debounce(searchNewsHandler,300))
+
+    function searchNewsHandler () {
+            const fullScroll = document.querySelector('.scroll')
+            fullScroll.innerHTML = ''
+            hideNextText()
+            showLoading()
+            Object.assign(paging,{
+                current:1,
+                pageSize:10
+            })
+            loadNewsData()
+    }
 
     loadNewsData()
 
@@ -70,9 +73,8 @@ export function init(){
     }
 
     window.addEventListener("scroll",debounce(lazyload,100))
-    var isLoading = false
     document.querySelector('.next-page').addEventListener('click',function(){
-        if ( isLoading ){
+        if ( paging.state === "2" ){
             return
         }
         hideNextText()
@@ -82,32 +84,43 @@ export function init(){
 
     // 加载新闻列表
     function loadNewsData(){
-        isLoading = true
-        Object.assign( paging, {
-            current:paging.current + 1,
-            pageSize:10,
-            total:paging.total
+        Object.assign(paging,{
+            state: "2"
         })
+        setUpPaddingByState()
         // 模拟接口返回时间
         setTimeout(function(){
-            for ( let i =0; i < paging.pageSize; i++ ){
-                paging.total++;
+            const currentData = findNewsByPageAndType()
+            if ( currentData.length === 0 ){
+                Object.assign( paging, {
+                    current:1,
+                    state: "3"
+                })
+            } else {
+                Object.assign( paging, {
+                    state: "1"
+                })
+            }
+            for ( let i =0; i < currentData.length; i++ ){
+                const el = currentData[i]
                 Array.prototype.forEach.call(createNewsItem({
-                    title: getRandomTitle(),
-                    text: getRandomContentText(),
-                    src: getRandomSrc(),
-                    date: getRandomDateText()
+                    title: el.title,
+                    text: el.content,
+                    src: el.img,
+                    date: el.date
                 }),function(node){
                     document.querySelector('.scroll').appendChild(node)
                     // 添加后主动触发
                     dispatchLazyImg()
                 })
             }
-            hideLoading()
-            showNextText()
-            isLoading = false
-            console.log(`当前第${paging.current}页数,共${paging.total}条数据`)
-        },1500)
+            Object.assign( paging, {
+                current:paging.current + 1,
+                pageSize:10
+            })
+            setUpPaddingByState()
+            console.log(`当前第${paging.current-1}页`)
+        },1000)
     }
     
     // 主动触发图片加载
@@ -161,6 +174,53 @@ export function init(){
         } else {
             btn.removeAttribute('disabled')
         }
+    }
+
+    // 根据分页和类型查询新闻列表
+    function findNewsByPageAndType () {
+        if (selectds.length === 0){
+            return pagination(paging.current,paging.pageSize,allNews)
+        }
+        const selectdsVals = selectds.map(function(el){
+            return el.value
+        })
+        const data = allNews.filter(function(el){
+            return selectdsVals.indexOf(el.type) > -1
+        })
+        return pagination(paging.current,paging.pageSize,data)
+    }
+    // 分页查询
+    function pagination(pageNo, pageSize, array) {
+        var offset = (pageNo - 1) * pageSize;
+        return (offset + pageSize >= array.length) ? array.slice(offset, array.length) : array.slice(offset, offset + pageSize);
+    }
+
+    // 数据为空 隐藏分页，展示无数据状态
+    function emptyDataHandler(datas){
+        if ( datas.length !== 0){
+            document.querySelector('.next-page').style.display = 'block'
+            document.querySelector('.empty-data') && document.querySelector('.empty-data').remove()
+            return
+        }
+        if ( datas.length === 0 && paging.current === 1 ){
+            setEmptyData()
+            return
+        }
+        if (datas.length === 0 && paging.current -1 !== 1){
+            setPaddingEmptyData()
+        }
+    }
+
+    function setEmptyData(){
+        document.querySelector('.scroll').innerHTML = `<div class="empty-data">无数据...</div>`
+        document.querySelector('.next-page').style.display = 'none'
+    }
+
+    function setPaddingEmptyData(){
+        const dom =  document.createElement('div')
+        dom.innerHTML = '没有更多数据了'
+        document.querySelector('body').appendChild(dom)
+        document.querySelector('.next-page').style.display = 'none'
     }
 
     // 随机返回图片地址
@@ -262,6 +322,26 @@ export function init(){
         return titles[Math.floor(Math.random()*titles.length)]
     }
 
+    function setUpPaddingByState () {
+        switch (paging.state){
+            case "1":
+                showNextText()
+                hideLoading()
+                hideEmptyData()
+            break;
+            case "2":
+                showLoading()
+                hideNextText()
+                hideEmptyData()
+            break;
+            case "3":
+                showEmptyData()
+                hideLoading()
+                hideNextText()
+            break;
+        }
+    }
+
     function showLoading (){
         (document.querySelector('.spinner') as HTMLDivElement).style.display = 'block'
     }
@@ -273,5 +353,11 @@ export function init(){
     }
     function hideNextText(){
         (document.querySelector('.next-page-text') as HTMLDivElement).style.display = 'none'
+    }
+    function showEmptyData(){
+        (document.querySelector('.empty-data') as HTMLDivElement).style.display = 'block'
+    }
+    function hideEmptyData(){
+        (document.querySelector('.empty-data') as HTMLDivElement).style.display = 'none'
     }
 }
